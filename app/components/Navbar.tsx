@@ -11,7 +11,7 @@ export default function Navbar() {
 
     return (
 
-        <footer className="bg-black h-24 p-5 fixed w-full text-white bottom-0 left-0">
+        <footer className="bg-black h-20 p-5 fixed w-full text-white bottom-0 left-0">
 
             <ul className="flex h-full items-center flex-row gap-8 w-full justify-center">
 

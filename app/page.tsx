@@ -13,7 +13,7 @@ export default function Home() {
           <div className="p-3 w-full">
 
             <h2 className="text-xl underline">Our Mission</h2>
-            <p className="w-[90%] text-lg italic px-15 py-10 text-justify">
+            <p className="text-lg italic px-15 py-10 text-justify">
 
               "To bridge the gap between talented students seeking internship opportunities
               and companies looking for passionate, skilled interns.
