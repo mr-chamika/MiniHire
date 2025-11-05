@@ -2,8 +2,12 @@
 
 import AuthTopbar from "./components/AuthTopbar";
 import Navbar from "./components/Navbar";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+
+  const router = useRouter();
+
   return (
     <div className="min-h-screen">
       <main>
@@ -45,7 +49,7 @@ export default function Home() {
 
               <div className="flex flex-row justify-between">
                 <h2 className="text-xl underline">As a company</h2>
-                <button onClick={() => alert('sign up as a company')} className=" text-white bg-black rounded-lg px-2 pb-0.5 text-sm font-bold hover:cursor-pointer">Get Started</button>
+                <button onClick={() => router.push('/company')} className=" text-white bg-black rounded-lg px-2 pb-0.5 text-sm font-bold hover:cursor-pointer">Get Started</button>
               </div>
               <p className="py-5 text-justify px-4">
 
@@ -64,7 +68,7 @@ export default function Home() {
 
               <div className="flex flex-row justify-between">
                 <h2 className="text-xl underline">As an applicant</h2>
-                <button onClick={() => alert('sign up as a applicant')} className=" text-white bg-black rounded-lg px-2 pb-0.5 text-sm font-bold hover:cursor-pointer">Get Started</button>
+                <button onClick={() => router.push('/student')} className=" text-white bg-black rounded-lg px-2 pb-0.5 text-sm font-bold hover:cursor-pointer">Get Started</button>
               </div>
               <p className="py-5 text-justify px-4">
 
