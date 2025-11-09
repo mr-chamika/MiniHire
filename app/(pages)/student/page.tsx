@@ -6,7 +6,7 @@ import { useState } from "react";
 import Unhide from '../../../public/assets/eye.png'
 import Hide from '../../../public/assets/hidden.png'
 import Image from "next/image";
-import { setEnvironmentData } from "node:worker_threads";
+import axios from "axios";
 
 export default function StudentSignup() {
 
@@ -44,90 +44,73 @@ export default function StudentSignup() {
         { label: "BSc (Hons) in Computer Science.", value: "CS (Hons)" },
         { label: "BSc in Computer Science.", value: "CS" },
     ]
-    const [email, setEmail] = useState('hasithchamika2001@gmail.com');
-    const [password, setPassword] = useState('1234');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [show, setShow] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('1234');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [hide, setHide] = useState(true);
-    const [firstName, setFirstName] = useState('Hasith');
-    const [lastName, setLastName] = useState('Wijesinghe');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [university, setUniveristy] = useState(uniOptions[0].value);
     const [degree, setDegree] = useState(degreeOptions[0].value);
-    const [linkedin, setLinkedin] = useState('https://www.linkedin.com/in/hasith-wijesinghe-3394062a2/');
-    const [portfolio, setPortfolio] = useState('https://www.linkedin.com/in/hasith-wijesinghe-3394062a2/');
-    const [file, setFile] = useState<File | null>(null);
+    const [linkedin, setLinkedin] = useState('');
+    const [portfolio, setPortfolio] = useState('');
+    const [resume, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [errorCP, setErrorCP] = useState('');
+    const [errorE, setErrorE] = useState('');
 
 
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
 
+        try {
+            if (email.trim().length !== 0 &&
+                firstName.trim().length !== 0 &&
+                lastName.trim().length !== 0 &&
+                linkedin.trim().length !== 0 &&
+                portfolio.trim().length !== 0 &&
+                resume &&
+                password.trim().length !== 0 &&
+                confirmPassword.trim().length !== 0) {
 
-        if (email.trim().length !== 0 &&
-            firstName.trim().length !== 0 &&
-            lastName.trim().length !== 0 &&
-            linkedin.trim().length !== 0 &&
-            portfolio.trim().length !== 0 &&
-            file &&
-            password.trim().length !== 0 &&
-            confirmPassword.trim().length !== 0) {
+                if (password.trim().length < 8) {
 
-            if (password.trim().length < 8) {
+                    setError('Minimum length is 8');
+                    setErrorCP('')
+                    return;
 
-                setError('Password must contains at least 8 characters');
-                setErrorCP('')
-                return;
+                }
+                if (password.trim() !== confirmPassword.trim()) {
+                    setError('')
+                    setErrorCP('Password must matches with above entered');
+                    return;
+
+                }
+
+                setError('');
+                setErrorCP('');
+
+                const res = await axios.post('api/students', { email, firstName, lastName, linkedin, portfolio, resume: resume.name, password, degree, university })
+
+                const data = res.data;
+
+                if (data.errorResponse && data.errorResponse.errmsg.includes(`E11000 duplicate key error collection: MiniHire.students index: email_1 dup key:`)) {
+
+                    setErrorE('Email already exists');
+                    return;
+
+                }
+
+                setErrorE('');
+
+                alert('Signup Successed');
 
             }
-            if (password.trim() !== confirmPassword.trim()) {
-                setError('')
-                setErrorCP('Password must matches with above entered');
-                return;
+        } catch (err) {
 
-            }
-
-            setError('');
-            setErrorCP('');
-
-            console.log(email)
-            console.log(firstName)
-            console.log(lastName)
-            console.log(linkedin)
-            console.log(portfolio)
-            console.log(file)
-            console.log(password)
-            console.log(confirmPassword)
-
-
-            //   await fetch('http://localhost:5000/api/login', {
-
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ email, password })
-
-            //   })
-
-            //     .then(res => res.json())
-            //     .then(data => {
-
-            //       if (data.message === 'done' && data.token) {
-
-            //         window.location.href = `http://localhost:5000/admin?token=${data.token}`;
-
-            //       } else {
-
-            //         setError('* Wrong email or password');
-
-            //       }
-            //     })
-            //     .catch(err => console.log(`Error from login : ${err}`))
-
-
-        } else {
-
-            //setError('* Wrong email or password');
+            alert('Error Signing Up: ' + err);
 
         }
 
@@ -144,29 +127,25 @@ export default function StudentSignup() {
                 <form onSubmit={handleSubmit} className="w-[90%] shadow-xl px-10 pt-10 pb-2 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
                     <div className="flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full">
                         <div className="sm:w-[50%] space-y-5">
-                            <div className="w-full flex flex-col">
+                            <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">First Name</label>
                                 <input required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
+
                             </div>
-                            <div className="w-full flex flex-col">
+                            <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">Last Name</label>
                                 <input required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
+
                             </div>
                             <div className="w-full flex flex-col">
 
                                 <label className="text-lg text-gray-500">Email</label>
                                 <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
+                                <div className="w-full h-2">
+                                    <span className={` text-red-400 text-sm italic ${errorE === '' ? 'opacity-0' : 'opacity-100'}`}>{errorE}</span>
+                                </div>
                             </div>
                             <div className="w-full flex flex-col">
 
@@ -196,7 +175,7 @@ export default function StudentSignup() {
                             </div>
                         </div>
                         <div className="sm:w-[50%] space-y-5">
-                            <div className="w-full flex flex-col">
+                            <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">University</label>
                                 <select value={university} onChange={(e) => setUniveristy(e.target.value)} className="[&::-webkit-scrollbar]:hidden inline-block hover:cursor-pointer appearance-none outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200" >
@@ -207,11 +186,8 @@ export default function StudentSignup() {
                                     ))}
 
                                 </select>
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
                             </div>
-                            <div className="w-full flex flex-col">
+                            <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">Degree</label>
                                 <select value={degree} onChange={(e) => setDegree(e.target.value)} className="[&::-webkit-scrollbar]:hidden inline-block hover:cursor-pointer appearance-none outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200" >
@@ -222,18 +198,11 @@ export default function StudentSignup() {
                                     ))}
 
                                 </select>
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
                             </div>
-                            <div className="w-full flex flex-col">
+                            <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">Your Portfolio</label>
                                 <input required type="url" value={portfolio} onChange={(e) => setPortfolio(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
                             </div>
                             <div className="w-full flex flex-col">
 
