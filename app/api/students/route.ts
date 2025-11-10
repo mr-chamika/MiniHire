@@ -1,6 +1,7 @@
 import { Database } from "@/db";
 import { Student } from "@/models/Student";
 import { put } from "@vercel/blob";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
 
@@ -25,8 +26,12 @@ export async function POST(req: Request) {
 
         }
 
+        //convert cv to byte sequence and save it in blob storage in vercel
         const buffer = Buffer.from(await resume.arrayBuffer());
         const blob = await put(resume.name, buffer, { access: 'public', addRandomSuffix: true, contentType: resume.type })
+
+        //hashing raw password using bcryptjs
+        const hashedPassword = await bcrypt.hash(password.toString(), 10);
 
         const newStudent = await Student.create({
 
@@ -36,7 +41,7 @@ export async function POST(req: Request) {
             linkedin,
             portfolio,
             resume: blob.url,
-            password,
+            password: hashedPassword,
             degree,
             university
 
