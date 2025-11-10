@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import Link from "next/link";
 import { useState } from "react";
@@ -92,9 +92,28 @@ export default function StudentSignup() {
                 setError('');
                 setErrorCP('');
 
-                const res = await axios.post('api/students', { email, firstName, lastName, linkedin, portfolio, resume: resume.name, password, degree, university })
+                const formData = new FormData();
 
+                formData.append("email", email.toLocaleLowerCase());
+                formData.append("firstName", firstName.toLocaleLowerCase());
+                formData.append("lastName", lastName.toLocaleLowerCase());
+                formData.append("linkedin", linkedin.toLocaleLowerCase());
+                formData.append("portfolio", portfolio.toLocaleLowerCase());
+                formData.append("resume", resume);
+                formData.append("password", password);
+                formData.append("degree", degree);
+                formData.append("university", university);
+
+                const res = await axios.post('/api/students', formData);
+                //automatically set headers to {'Content-Type':'multipart/form-data'} 
                 const data = res.data;
+
+                if (data.error) {
+
+                    console.log('Error from server: ' + data.error);
+                    return;
+
+                }
 
                 if (data.errorResponse && data.errorResponse.errmsg.includes(`E11000 duplicate key error collection: MiniHire.students index: email_1 dup key:`)) {
 
@@ -105,7 +124,7 @@ export default function StudentSignup() {
 
                 setErrorE('');
 
-                alert('Signup Successed');
+                console.log('Signup Successed');
 
             }
         } catch (err) {
@@ -216,14 +235,12 @@ export default function StudentSignup() {
 
                                 <label className="text-lg text-gray-500">Your Resume</label>
                                 <input required type="file" accept="application/pdf" onChange={(e) => { e.target.files && e.target.files.length > 0 && setFile(e.target.files[0]) }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-                                {/* <div className="w-full h-2">
-                                    <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
-                                </div> */}
+
                             </div>
                         </div>
                     </div>
                     <input type="submit" value='Sign Up As a Student' className="outline-none bg-green-500 text-white sm:w-[60%] w-full py-1 mt-5 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
-                    <p className="py-2">Have an account? <Link href='/login' className="text-blue-500">Login Here</Link></p>
+                    <p className="py-2">Have an account? <Link href='/login' className="text-blue-500"><span>Login Here</span></Link></p>
                 </form>
             </div>
         </div>
