@@ -1,5 +1,6 @@
 "use client"
 
+import Modal from "@/app/components/Modal";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -60,25 +61,15 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
 
             <button onClick={() => setShow(true)}>Show CV</button>
             {show &&
-                <div className='fixed z-50 top-0 w-full h-full bg-white'>
-                    <div className="flex justify-end">
+                <Modal show={show} setShow={setShow}>
 
-                        <button
-
-                            className="bg-red-400 text-white rounded-full m-2 px-2 py-0.5 border-2 hover:cursor-pointer hover:bg-red-500"
-                            onClick={() => setShow(false)}
-                        >
-                            X
-                        </button>
-
-                    </div>
                     <iframe
                         src={user?.resume}
                         className="w-full flex-grow h-[93vh]"
                         title="Hasith Wijesinghe CV"
-                    >
-                    </iframe>
-                </div>
+                    />
+
+                </Modal>
             }
 
         </div>

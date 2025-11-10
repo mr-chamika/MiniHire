@@ -7,6 +7,7 @@ import Unhide from '../../../public/assets/eye.png'
 import Hide from '../../../public/assets/hidden.png'
 import Image from "next/image";
 import axios from "axios";
+import Modal from "@/app/components/Modal";
 
 export default function StudentSignup() {
 
@@ -59,12 +60,12 @@ export default function StudentSignup() {
     const [error, setError] = useState('');
     const [errorCP, setErrorCP] = useState('');
     const [errorE, setErrorE] = useState('');
+    const [modal, setModal] = useState(false);
 
 
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
-
         try {
             if (email.trim().length !== 0 &&
                 firstName.trim().length !== 0 &&
@@ -125,6 +126,8 @@ export default function StudentSignup() {
                 setErrorE('');
 
                 console.log('Signup Successed');
+
+                setModal(true);
 
             }
         } catch (err) {
@@ -243,6 +246,17 @@ export default function StudentSignup() {
                     <p className="py-2">Have an account? <Link href='/login' className="text-blue-500"><span>Login Here</span></Link></p>
                 </form>
             </div>
+
+            {modal &&
+
+                <Modal show={modal} setShow={setModal}>
+
+                    <p>hello</p>
+
+                </Modal>
+
+            }
+
         </div>
 
     )
