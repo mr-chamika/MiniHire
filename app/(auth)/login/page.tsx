@@ -23,6 +23,8 @@ export default function Login() {
 
     useEffect(() => {
 
+        setIsMounted(true);
+
         const exp = params.get("message");
 
         if (exp) {
@@ -31,7 +33,7 @@ export default function Login() {
 
         }
 
-    }, [])
+    }, [params, isMounted])
 
     const handleSubmit = async (e: any) => {
 
