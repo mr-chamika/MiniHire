@@ -18,17 +18,17 @@ export default function CompanySignup() {
 
     ]
 
-    const [email, setEmail] = useState('hasithchamika2001@gmail.com');
-    const [password, setPassword] = useState('1234');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [show, setShow] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('1234');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [hide, setHide] = useState(true);
-    const [companyName, setCompanyName] = useState('Creative Software');
-    const [contact, setContact] = useState('0123456789');
+    const [companyName, setCompanyName] = useState('');
+    const [contact, setContact] = useState('');
     const [started, setStarted] = useState(Number(new Date().getFullYear()) - 10);
     const [size, setSize] = useState(sizes[0].value);
-    const [linkedin, setLinkedin] = useState('https://www.linkedin.com/in/hasith-wijesinghe-3394062a2/');
-    const [portfolio, setPortfolio] = useState('https://www.linkedin.com/in/hasith-wijesinghe-3394062a2/');
+    const [linkedin, setLinkedin] = useState('');
+    const [portfolio, setPortfolio] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [errorCP, setErrorCP] = useState('');
