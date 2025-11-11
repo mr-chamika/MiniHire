@@ -19,24 +19,24 @@ export default function Home() {
             <h2 className="text-xl underline">Our Mission</h2>
             <p className="text-lg italic px-15 py-10 text-justify">
 
-              "To bridge the gap between talented students seeking internship opportunities
-              and companies looking for passionate, skilled interns.
-              We aim to make the internship matching process faster, easier, and more transparent
+              "To bridge the gap between talented students seeking IT internship opportunities
+              and companies looking for passionate, skilled IT interns.
+              We aim to make the IT internship matching process faster, easier, and more transparent
               — helping both applicants and organizations grow together."
 
             </p>
 
           </div>
 
-          <div className="w-full space-x-10 flex flex-row">
+          <div className="w-full mb-5 gap-5 sm:gap-0 sm:space-x-10 flex sm:flex-row flex-col">
 
             <div className="p-3 w-full bg-blue-100 shadow-md rounded-2xl">
 
               <h2 className="text-xl underline">What you get</h2>
               <ul className="py-5 space-y-6">
 
-                <li>🔍 Find Internships Easily  </li>
-                <li>💼 Post Internship Opportunities  </li>
+                <li>🔍 Find IT Internships Easily  </li>
+                <li>💼 Post IT Internship Vacancies  </li>
                 <li>🤝 Connect and Communicate  </li>
                 <li>⭐ Verified Profiles  </li>
 
@@ -53,10 +53,10 @@ export default function Home() {
               </div>
               <p className="py-5 text-justify px-4">
 
-                MiniHelp simplifies the process for companies to find talented interns
+                MiniHelp simplifies the process for companies to find talented IT interns
                 by providing an easy-to-use dashboard for posting opportunities,
                 managing applications, and reviewing detailed student profiles.
-                Businesses can communicate directly with potential interns,
+                Businesses can communicate directly with potential IT interns,
                 ensuring a smoother recruitment process. With verified applicants
                 and organized insights, companies can focus on building strong teams
                 while contributing to the growth of future professionals.
@@ -73,7 +73,7 @@ export default function Home() {
               <p className="py-5 text-justify px-4">
 
                 MiniHelp empowers students to easily discover and apply for
-                verified internship opportunities across various industries.
+                verified IT internship opportunities across various industries.
                 Applicants can build a professional profile that highlights their
                 skills, education, and goals — allowing companies to notice them
                 without needing to send resumes repeatedly. With real-time communication
