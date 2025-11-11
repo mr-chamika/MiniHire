@@ -113,7 +113,7 @@ export default function CompanySignup() {
             <div className="w-[70%] min-w-[500px] gap-12 flex-col flex items-center">
 
                 <div className="w-full flex justify-center">
-                    <h1 className='md:text-5xl text-3xl font-semibold'>Welcome to MiniHelp</h1>
+                    <h1 className='md:text-5xl text-3xl font-semibold'>Welcome to MiniHire</h1>
                 </div>
                 <form onSubmit={handleSubmit} className="w-[90%] shadow-xl px-10 pt-10 pb-2 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
                     <div className="flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full">

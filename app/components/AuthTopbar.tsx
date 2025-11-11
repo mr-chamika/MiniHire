@@ -13,7 +13,7 @@ export default function AuthTopbar() {
 
             <div className="items-center h-full flex">
 
-                <Link href="/" className="bg-blue-600 p-3 rounded-lg text-white font-serif">MiniHelp</Link>
+                <Link href="/" className="bg-blue-600 p-3 rounded-lg text-white font-serif">MiniHire</Link>
 
             </div>
 

@@ -24,7 +24,7 @@ export default function Signup() {
                     <Image src={Company} alt="company" className='w-[95%] h-[60%]' />
                     <p className="py-5 text-justify px-4">
 
-                        MiniHelp simplifies the process for companies to find talented interns
+                        MiniHire simplifies the process for companies to find talented interns
                         by providing an easy-to-use dashboard for posting opportunities,
                         managing applications, and reviewing detailed student profiles.
                         Businesses can communicate directly with potential interns,
@@ -43,7 +43,7 @@ export default function Signup() {
                     <Image src={Student} alt="company" className='w-[95%] h-[60%]' />
                     <p className="py-5 text-justify px-4">
 
-                        MiniHelp empowers students to easily discover and apply for
+                        MiniHire empowers students to easily discover and apply for
                         verified internship opportunities across various industries.
                         Applicants can build a professional profile that highlights their
                         skills, education, and goals — allowing companies to notice them
