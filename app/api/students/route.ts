@@ -100,7 +100,7 @@ export async function POST(req: Request) {
 
             const email = formData.get("email") as string;
             const password = formData.get("password") as string;
-            const isTokenExists = formData.get("isTokenExistss");
+            const isTokenExists = formData.get("isTokenExists");
 
             if (!email || !password) {
 
