@@ -1,5 +1,4 @@
 import { Student } from "@/models/Student";
-import { saved } from "../route";
 
 export async function POST(req: Request) {
 
@@ -8,31 +7,29 @@ export async function POST(req: Request) {
     const email = formData.get("email") as string;
     const otp = formData.get("otp");
 
-    const store = saved[email];
-
-    if (store.otp != otp) {
-
-        return Response.json({ message: 'OTP does not match' });
-
-    }
-    if (Date.now() > store.expires) {
-
-        return Response.json({ message: 'OTP expired' });
-
-    }
-
     const user = await Student.findOne({ email }).select('-password');
 
     if (!user) {
 
-        return Response.json({ message: 'Signup First !!!!!' });
+        return Response.json({ message: 'Signup again' });
 
     }
 
+    if (Date.now() > user.expires) {
+
+        return Response.json({ message: 'OTP expired' });
+
+    }
+    if (user.otp != otp) {
+
+        return Response.json({ message: 'OTP does not match' });
+
+    }
+
+    user.otp = undefined;
+    user.expires = undefined;
     user.verified = true;
     await user.save();
-
-    delete saved[email.toLowerCase()];
 
     return Response.json({ message: 'Verified', user: user });
 

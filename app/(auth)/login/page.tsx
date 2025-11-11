@@ -1,5 +1,6 @@
 'use client'
 
+import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -14,41 +15,45 @@ export default function Login() {
 
         e.preventDefault();
 
-        if (email.length !== 0 && password.length !== 0) {
+        try {
 
 
-            setError('')
+            if (email.length !== 0 && password.length !== 0) {
 
-            //   await fetch('http://localhost:5000/api/login', {
+                const formData = new FormData();
 
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ email, password })
+                formData.append("email", email.toLowerCase());
+                formData.append("password", password);
 
-            //   })
+                const res = await axios.post('/api/login', formData);
 
-            //     .then(res => res.json())
-            //     .then(data => {
+                if (!res) {
 
-            //       if (data.message === 'done' && data.token) {
+                    setError('Check your connection');
+                    return;
 
-            //         window.location.href = `http://localhost:5000/admin?token=${data.token}`;
+                }
+                if (res.status != 200) {
 
-            //       } else {
+                    setError('There is a login error');
+                    return;
 
-            //         setError('* Wrong email or password');
+                }
 
-            //       }
-            //     })
-            //     .catch(err => console.log(`Error from login : ${err}`))
+                setError('')
 
+            } else {
 
-        } else {
+                setError('* Wrong email or password');
 
-            setError('* Wrong email or password');
+            }
+
+        } catch (err) {
+
+            console.log('Error from login : ' + err);
+            setError('Failed to login');
 
         }
-
     }
 
     return (

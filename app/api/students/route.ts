@@ -9,8 +9,6 @@ interface OtpStore {
 
 }
 
-export const saved: OtpStore = {};
-
 export async function POST(req: Request) {
 
     const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -24,6 +22,7 @@ export async function POST(req: Request) {
         const email = formData.get("email") as string;
         const firstName = formData.get("firstName");
         const lastName = formData.get("lastName");
+        const role = formData.get("role");
         const linkedin = formData.get("linkedin");
         const portfolio = formData.get("portfolio");
         const resume = formData.get("resume") as File;
@@ -35,6 +34,16 @@ export async function POST(req: Request) {
             return Response.json({ error: 'All fields are required' });
 
         }
+
+        const isExists = await Student.findOne({ email: email.toLowerCase() });
+
+        if (isExists && !isExists.verified) {
+
+            await Student.deleteOne({ email: email.toLowerCase() })
+
+        }
+
+        const otp = generateOTP();
 
         //convert cv to byte sequence and save it in blob storage in vercel
         const buffer = Buffer.from(await resume.arrayBuffer());
@@ -48,20 +57,20 @@ export async function POST(req: Request) {
             email,
             firstName,
             lastName,
+            role,
             linkedin,
             portfolio,
             resume: blob.url,
             password: hashedPassword,
             degree,
-            university
+            university,
+            otp,
+            expires: new Date(Date.now() + 1000 * 60 * 5)
 
         })
 
         if (newStudent) {
 
-            const otp = generateOTP();
-
-            saved[email.toLowerCase()] = { otp, expires: Date.now() + 1000 * 60 * 5 };
 
             if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
 

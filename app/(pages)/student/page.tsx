@@ -162,6 +162,7 @@ export default function StudentSignup() {
                 formData.append("email", email.toLocaleLowerCase());
                 formData.append("firstName", firstName.toLocaleLowerCase());
                 formData.append("lastName", lastName.toLocaleLowerCase());
+                formData.append("role", "student");
                 formData.append("linkedin", linkedin.toLocaleLowerCase());
                 formData.append("portfolio", portfolio.toLocaleLowerCase());
                 formData.append("resume", resume);
