@@ -37,11 +37,6 @@ export default function StudentSignup() {
         // Add other state universities/institutions as needed (e.g., KDU, Ocean University)
     ];
 
-    const roleOptions = [
-        { label: "Company", value: "company" },
-        { label: "Student", value: "student" },
-    ]
-
     const degreeOptions = [
         { label: "BSc (Hons) in Software Engineering.", value: "SE (Hons)" },
         { label: "BSc in Software Engineering.", value: "SE" },

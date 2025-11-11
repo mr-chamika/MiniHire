@@ -3,13 +3,21 @@
 import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
+import Unhide from '../../../public/assets/eye.png'
+import Hide from '../../../public/assets/hidden.png'
 
 export default function Login() {
+
+    const router = useRouter();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [show, setShow] = useState(false);
+
 
     const handleSubmit = async (e: any) => {
 
@@ -20,12 +28,13 @@ export default function Login() {
 
             if (email.length !== 0 && password.length !== 0) {
 
+                setError('')
                 const formData = new FormData();
 
                 formData.append("email", email.toLowerCase());
                 formData.append("password", password);
 
-                const res = await axios.post('/api/login', formData);
+                const res = await axios.post('/api/students', formData);
 
                 if (!res) {
 
@@ -40,7 +49,15 @@ export default function Login() {
 
                 }
 
-                setError('')
+                if (!res.data.token && res.data.message) {
+
+                    setError(res.data.message);
+                    return;
+
+                }
+
+                alert(res.data.token);
+                router.push('/student/dashboard');
 
             } else {
 
@@ -69,14 +86,19 @@ export default function Login() {
                     <div className="w-full flex flex-col mb-5">
 
                         <label className="text-lg">Enter Your Email</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="company@gmail.com" className="outline-none text-gray-700 rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="outline-none text-gray-700 rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
                     </div>
                     <div className="w-full flex flex-col mb-5">
 
                         <label className="text-lg">Enter Password</label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password" className="outline-none text-gray-700 rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-                        <div className="w-full h-2">
+                        <div className="flex bg-blue-100 border border-blue-200 flex-row items-center rounded-lg">
+
+                            <input type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="outline-none text-gray-700 rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                            <Image onClick={() => setShow(!show)} src={show ? Unhide : Hide} alt="" width={20} className="mr-2 hover:cursor-pointer" />
+
+                        </div>
+                        <div className="w-full h-2 pt-1">
                             <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
                         </div>
                     </div>
