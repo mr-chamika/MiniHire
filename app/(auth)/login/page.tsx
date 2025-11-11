@@ -11,11 +11,11 @@ import Hide from '../../../public/assets/hidden.png'
 
 export default function Login() {
 
-    const router = useRouter();
     const params = useSearchParams();
+    const router = useRouter();
 
-    const [email, setEmail] = useState('chamikauni2001@gmail.com');
-    const [password, setPassword] = useState('12345678');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [show, setShow] = useState(false);
     const [message, setMessage] = useState('');
@@ -99,7 +99,7 @@ export default function Login() {
             <div className="w-[70%] gap-12 flex-col flex items-center">
 
                 <div className=" w-full flex justify-center mb-5">
-                    <h1 className='text-6xl font-semibold'>Sign in to MiniHelp</h1>
+                    <h1 className='text-6xl font-semibold'>Sign in to MiniHire</h1>
                 </div>
                 <form onSubmit={handleSubmit} className="shadow-xl rounded-3xl px-8 pt-8 h-[68%] w-96 flex flex-col justify-between items-center bg-gray-50">
 
