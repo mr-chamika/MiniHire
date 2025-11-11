@@ -11,15 +11,15 @@ import Hide from '../../../public/assets/hidden.png'
 
 export default function Login() {
 
-    const params = useSearchParams();
-    const router = useRouter();
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [show, setShow] = useState(false);
     const [message, setMessage] = useState('');
+    const [isMounted, setIsMounted] = useState(false);
 
+    const params = useSearchParams();
+    const router = useRouter();
 
     useEffect(() => {
 
