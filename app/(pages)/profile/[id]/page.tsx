@@ -14,6 +14,7 @@ interface Student {
     resume: string;
     degree: string;
     university: string;
+    verified: boolean;
 }
 
 export default function Profile({ params }: { params: Promise<{ id: string }> }) {

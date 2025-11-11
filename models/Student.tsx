@@ -10,7 +10,8 @@ const StudentSchema = new Schema({
     degree: { type: String, required: true },
     portfolio: { type: String, required: true },
     linkedin: { type: String, required: true },
-    resume: { type: String, required: true }
+    resume: { type: String, required: true },
+    verified: { type: Boolean, default: false }
 
 }, { timestamps: true })
 

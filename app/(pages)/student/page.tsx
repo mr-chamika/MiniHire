@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Unhide from '../../../public/assets/eye.png'
 import Hide from '../../../public/assets/hidden.png'
@@ -10,6 +11,8 @@ import axios from "axios";
 import Modal from "@/app/components/Modal";
 
 export default function StudentSignup() {
+
+    const router = useRouter();
 
     const uniOptions = [
         { label: "University of Colombo", value: "UOC" },
@@ -61,7 +64,68 @@ export default function StudentSignup() {
     const [errorCP, setErrorCP] = useState('');
     const [errorE, setErrorE] = useState('');
     const [modal, setModal] = useState(false);
+    const [otp, setOtp] = useState(Array(6).fill(""));
+    const [message, setMessage] = useState("");
 
+    const handleChange = (value: string, index: number) => {
+        if (/^[0-9]?$/.test(value)) {
+            const newOtp = [...otp];
+            newOtp[index] = value;
+            setOtp(newOtp);
+
+            if (value && index < 5) {
+                const nextInput = document.querySelector(
+                    `input[data-index='${index + 1}']`
+                ) as HTMLInputElement | null;
+                nextInput?.focus();
+            }
+
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === "Backspace" && !otp[index] && index > 0) {
+            const prevInput = document.querySelector(
+                `input[data-index='${index - 1}']`
+            ) as HTMLInputElement | null;
+            prevInput?.focus();
+        }
+    };
+
+    const handle = async (e: any) => {
+        e.preventDefault();
+        try {
+
+            const finalOtp = otp.join("");
+            if (finalOtp.length < 6) {
+                setMessage("Please enter all 6 digits");
+                return;
+            }
+
+            const formData = new FormData();
+
+            formData.append("email", email.toLowerCase());
+            formData.append("otp", finalOtp);
+
+            const res = await axios.post('/api/students/verify', formData)
+
+            if (res.status == 200 && res.data.message == "Verified") {
+                setMessage("✅ OTP verified successfully!");
+                setOtp(Array(6).fill(""));
+                setModal(false);
+
+                router.replace(`/profile/${res.data.user._id}`);
+
+            } else {
+                setMessage("❌ Invalid OTP. Please try again.");
+            }
+
+        } catch (err) {
+
+            console.log('Error from load profile page: ' + error);
+
+        }
+    };
 
     const handleSubmit = async (e: any) => {
 
@@ -108,6 +172,18 @@ export default function StudentSignup() {
                 const res = await axios.post('/api/students', formData);
                 //automatically set headers to {'Content-Type':'multipart/form-data'} 
                 const data = res.data;
+
+                if (data.message) {
+
+                    if (res.status != 200) {
+
+                        console.log('Error from sending otp: ' + data.message);
+                        return;
+
+                    }
+                    console.log('From Server : ' + data.message);
+
+                }
 
                 if (data.error) {
 
@@ -251,7 +327,39 @@ export default function StudentSignup() {
 
                 <Modal show={modal} setShow={setModal}>
 
-                    <p>hello</p>
+                    <div className="w-full flex flex-col items-center justify-center min-h-screen">
+                        <form
+                            onSubmit={handle}
+                            className="bg-white p-6 rounded-xl shadow-md w-80 text-center"
+                        >
+                            <h2 className="text-xl font-semibold mb-4">Enter OTP</h2>
+
+                            <div className="flex justify-between mb-4">
+                                {otp.map((digit, index) => (
+                                    <input
+                                        key={index}
+                                        data-index={index}
+                                        type="text"
+                                        value={digit}
+                                        maxLength={1}
+                                        onChange={(e) => handleChange(e.target.value, index)}
+                                        onKeyDown={(e) => handleKeyDown(e, index)}
+                                        className="w-10 h-10 text-center border border-gray-300 rounded text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    />
+                                ))}
+                            </div>
+
+                            <input
+                                type="submit"
+                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+                                value="Verify"
+                            />
+
+                            {message && (
+                                <p className="text-sm mt-3 text-gray-700">{message}</p>
+                            )}
+                        </form>
+                    </div>
 
                 </Modal>
 
