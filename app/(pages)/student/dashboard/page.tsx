@@ -23,6 +23,9 @@ export default function Dashboard() {
 
         const inside = async () => {
 
+            if (typeof window === "undefined") return;
+
+
             const tokenString = localStorage.getItem("token");
 
             if (!tokenString) {
