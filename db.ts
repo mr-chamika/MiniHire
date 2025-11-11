@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const uri = process.env.MONGODB_URI;
-
 export const Database = async () => {
 
     if (!uri) {
@@ -14,6 +13,7 @@ export const Database = async () => {
     try {
 
         await mongoose.connect(uri, { dbName: 'MiniHire' });
+
         console.log("MongoDB database connected sucessfully");
 
     } catch (err) {

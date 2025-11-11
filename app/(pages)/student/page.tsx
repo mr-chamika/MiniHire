@@ -109,7 +109,8 @@ export default function StudentSignup() {
                 setOtp(Array(6).fill(""));
                 setModal(false);
 
-                router.replace(`/profile/${res.data.user._id}`);
+                //router.replace(`/profile/${res.data.user._id}`);
+                router.replace(`/login`);
 
             } else {
                 setMessage("❌ Invalid OTP. Please try again.");
