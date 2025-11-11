@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "MiniHelp",
+  title: "MiniHire",
 };
 
 export const viewport = {

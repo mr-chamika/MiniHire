@@ -2,7 +2,8 @@ import { Database } from "@/db";
 import { Student } from "@/models/Student";
 import { put } from "@vercel/blob";
 import bcrypt from "bcryptjs";
-import emailjs from "@emailjs/nodejs"
+import emailjs from "@emailjs/nodejs";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
 
@@ -99,6 +100,7 @@ export async function POST(req: Request) {
 
             const email = formData.get("email") as string;
             const password = formData.get("password") as string;
+            const isTokenExists = formData.get("isTokenExistss");
 
             if (!email || !password) {
 
@@ -122,7 +124,31 @@ export async function POST(req: Request) {
 
             }
 
-            return Response.json({ token: user });
+            if (!process.env.JWT_SECRET) {
+
+                return Response.json({ message: `Check your .env file JWT_SECRET is there` });
+
+            }
+
+            if (isTokenExists == "true") {//if token is not expired, no need to create again
+
+                return;
+
+            }
+            //create jwt token
+            const token = jwt.sign({
+                userId: user._id,
+                role: user.role,
+                verified: user.verified,
+                email: user.email
+            }, process.env.JWT_SECRET, { expiresIn: '1d' })
+
+            if (!token) {
+
+                return Response.json({ message: `Your token is missing` });
+
+            }
+            return Response.json({ token });
         }
 
     } catch (err) {

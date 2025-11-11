@@ -2,9 +2,9 @@
 
 import axios from "axios";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Unhide from '../../../public/assets/eye.png'
 import Hide from '../../../public/assets/hidden.png'
@@ -12,12 +12,26 @@ import Hide from '../../../public/assets/hidden.png'
 export default function Login() {
 
     const router = useRouter();
+    const params = useSearchParams();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('chamikauni2001@gmail.com');
+    const [password, setPassword] = useState('12345678');
     const [error, setError] = useState('');
     const [show, setShow] = useState(false);
+    const [message, setMessage] = useState('');
 
+
+    useEffect(() => {
+
+        const exp = params.get("message");
+
+        if (exp) {
+
+            setMessage(exp);
+
+        }
+
+    }, [])
 
     const handleSubmit = async (e: any) => {
 
@@ -25,14 +39,17 @@ export default function Login() {
 
         try {
 
-
             if (email.length !== 0 && password.length !== 0) {
 
+                setMessage('')
                 setError('')
                 const formData = new FormData();
 
                 formData.append("email", email.toLowerCase());
                 formData.append("password", password);
+
+                const isTokenExists = localStorage.getItem("token") ? true : false;
+                formData.append("isTokenExists", isTokenExists ? "true" : "false");
 
                 const res = await axios.post('/api/students', formData);
 
@@ -56,7 +73,10 @@ export default function Login() {
 
                 }
 
-                alert(res.data.token);
+                //saving token in localstorage
+
+                localStorage.setItem("token", res.data.token);
+
                 router.push('/student/dashboard');
 
             } else {
@@ -99,7 +119,7 @@ export default function Login() {
 
                         </div>
                         <div className="w-full h-2 pt-1">
-                            <span className={` text-red-400 text-sm italic ${error === '' ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
+                            <span className={` text-red-400 text-sm italic ${!(error || message) ? 'opacity-0' : 'opacity-100'}`}>{error ? error : message}</span>
                         </div>
                     </div>
                     <input type="submit" value='Sign In' className="outline-none bg-green-500 text-white w-full py-1 mt-1 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />

@@ -13,7 +13,7 @@ export default function Home() {
       <main>
         <AuthTopbar />
         <div className="py-20 w-full px-5">
-          <h1 className="text-5xl font-serif italic text-center py-5">Welcome to MiniHelp</h1>
+          <h1 className="text-5xl font-serif italic text-center py-5">Welcome to MiniHire</h1>
           <div className="p-3 w-full">
 
             <h2 className="text-xl underline">Our Mission</h2>
@@ -53,7 +53,7 @@ export default function Home() {
               </div>
               <p className="py-5 text-justify px-4">
 
-                MiniHelp simplifies the process for companies to find talented IT interns
+                MiniHire simplifies the process for companies to find talented IT interns
                 by providing an easy-to-use dashboard for posting opportunities,
                 managing applications, and reviewing detailed student profiles.
                 Businesses can communicate directly with potential IT interns,
@@ -72,7 +72,7 @@ export default function Home() {
               </div>
               <p className="py-5 text-justify px-4">
 
-                MiniHelp empowers students to easily discover and apply for
+                MiniHire empowers students to easily discover and apply for
                 verified IT internship opportunities across various industries.
                 Applicants can build a professional profile that highlights their
                 skills, education, and goals — allowing companies to notice them
