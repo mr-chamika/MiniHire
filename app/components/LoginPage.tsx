@@ -40,16 +40,14 @@ export default function LoginPage() {
         try {
 
             if (email.length !== 0 && password.length !== 0) {
-
+                console.log(email)
+                console.log(password)
                 setMessage('')
                 setError('')
                 const formData = new FormData();
 
                 formData.append("email", email.toLowerCase());
                 formData.append("password", password);
-
-                const isTokenExists = localStorage.getItem("token") ? true : false;
-                formData.append("isTokenExists", isTokenExists ? "true" : "false");
 
                 const res = await axios.post('/api/students', formData);
 
@@ -98,9 +96,9 @@ export default function LoginPage() {
             <div className="w-[70%] gap-12 flex-col flex items-center">
 
                 <div className=" w-full flex justify-center mb-5">
-                    <h1 className='text-6xl font-semibold'>Sign in to MiniHire</h1>
+                    <h1 className='sm:text-6xl text-3xl font-semibold'>Sign in to MiniHire</h1>
                 </div>
-                <form onSubmit={handleSubmit} className="shadow-xl rounded-3xl px-8 pt-8 h-[68%] w-96 flex flex-col justify-between items-center bg-gray-50">
+                <form onSubmit={handleSubmit} className="shadow-xl rounded-3xl px-8 pt-8 h-[68%] sm:w-[430px] w-[350px] flex flex-col justify-between items-center bg-gray-50">
 
                     <div className="w-full flex flex-col mb-5">
 

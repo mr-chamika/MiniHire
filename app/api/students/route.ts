@@ -100,7 +100,6 @@ export async function POST(req: Request) {
 
             const email = formData.get("email") as string;
             const password = formData.get("password") as string;
-            const isTokenExists = formData.get("isTokenExists");
 
             if (!email || !password) {
 
@@ -130,11 +129,6 @@ export async function POST(req: Request) {
 
             }
 
-            if (isTokenExists == "true") {//if token is not expired, no need to create again
-
-                return;
-
-            }
             //create jwt token
             const token = jwt.sign({
                 userId: user._id,
@@ -148,6 +142,7 @@ export async function POST(req: Request) {
                 return Response.json({ message: `Your token is missing` });
 
             }
+
             return Response.json({ token });
         }
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from "react";
 import AuthTopbar from "./components/AuthTopbar";
 import Navbar from "./components/Navbar";
 import { useRouter } from "next/navigation";
@@ -7,10 +8,28 @@ import { useRouter } from "next/navigation";
 export default function Home() {
 
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+
+    const isTokenExists = localStorage.getItem("token") ? true : false;
+
+    if (isTokenExists) {//if token exists navigate to dashboard
+
+      router.push('/student/dashboard');
+
+    } else {//if token expired navigate to landing page
+
+      setLoading(false);
+
+    }
+
+  }, [])
 
   return (
     <div className="min-h-screen">
-      <main>
+      {!loading ? <main>
         <AuthTopbar />
         <div className="py-20 w-full px-5">
           <h1 className="text-5xl font-serif italic text-center py-5">Welcome to MiniHire</h1>
@@ -89,7 +108,8 @@ export default function Home() {
 
         </div>
         <Navbar />
-      </main>
+      </main> : <p className="text-justify">Loading...</p>}
     </div>
+
   );
 }
