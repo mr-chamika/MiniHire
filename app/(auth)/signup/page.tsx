@@ -13,10 +13,10 @@ export default function Signup() {
 
         <div className="min-h-screen w-full px-10 py-3">
 
-            <div className=" w-full flex justify-center mb-10">
-                <h1 className='text-6xl font-semibold'>Choose Your Role First</h1>
+            <div className=" w-full flex justify-center sm:mb-10">
+                <h1 className='sm:text-6xl text-3xl font-semibold'>Choose Your Role First</h1>
             </div>
-            <div className="space-x-10 flex flex-row justify-around w-full">
+            <div className="sm:space-x-10 flex sm:flex-row flex-col justify-around w-full">
 
 
                 <div className="items-center flex flex-col pt-5">
@@ -33,11 +33,11 @@ export default function Signup() {
                         while contributing to the growth of future professionals.
 
                     </p>
-                    <button onClick={() => router.push('/company')} className="w-[75%] text-white bg-black rounded-lg px-2 pb-0.5 text-lg font-bold hover:cursor-pointer h-14 hover:shadow-xl">Sign Up as Company</button>
+                    <button onClick={() => router.push('/company')} className="sm:w-[75%] w-[95%] text-white bg-black rounded-lg px-2 pb-0.5 text-lg font-bold hover:cursor-pointer h-14 hover:shadow-xl">Sign Up as Company</button>
 
 
                 </div>
-                <div className="border-l-2 border-gray-200"></div>
+                <div className="sm:border-l-2 border-t-2 mt-5 border-gray-200"></div>
                 <div className="items-center flex flex-col pt-5">
 
                     <Image src={Student} alt="company" className='w-[95%] h-[60%]' />
@@ -53,7 +53,7 @@ export default function Signup() {
 
 
                     </p>
-                    <button onClick={() => router.push('/student')} className="w-[75%] text-white bg-black rounded-lg px-2 pb-0.5 text-lg font-bold hover:cursor-pointer h-14 hover:shadow-xl">Sign Up as Student</button>
+                    <button onClick={() => router.push('/student')} className="sm:w-[75%] w-[95%] text-white bg-black rounded-lg px-2 pb-0.5 text-lg font-bold hover:cursor-pointer h-14 hover:shadow-xl">Sign Up as Student</button>
 
 
                 </div>

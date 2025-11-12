@@ -213,8 +213,8 @@ export default function StudentSignup() {
 
     return (
 
-        <div className='min-h-screen w-full flex items-center justify-center'>
-            <div className="w-[70%] min-w-[500px] gap-12 flex-col flex items-center">
+        <div className='min-h-screen  w-full flex items-center justify-center'>
+            <div className="w-[70%] min-w-[500px] gap-12 flex-col flex items-center p-5">
 
                 <div className="w-full flex justify-center">
                     <h1 className='md:text-5xl text-3xl font-semibold'>Welcome to MiniHire</h1>
