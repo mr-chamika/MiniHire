@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AuthTopbar from "./components/AuthTopbar";
 import Navbar from "./components/Navbar";
 import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 
 export default function Home() {
 
@@ -13,11 +14,22 @@ export default function Home() {
   useEffect(() => {
 
 
-    const isTokenExists = localStorage.getItem("token") ? true : false;
+    const tokenString = localStorage.getItem("token");
 
-    if (isTokenExists) {//if token exists navigate to dashboard
+    if (tokenString) {//if token exists navigate to dashboard
+
+      const token = jwtDecode(tokenString);
+
+      if (token.exp && token.exp * 1000 < Date.now()) {
+
+        localStorage.removeItem("token");
+        router.push('/login');
+        return;
+
+      }
 
       router.push('/student/dashboard');
+      return;
 
     } else {//if token expired navigate to landing page
 
