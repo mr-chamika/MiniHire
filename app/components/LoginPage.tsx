@@ -40,8 +40,7 @@ export default function LoginPage() {
         try {
 
             if (email.length !== 0 && password.length !== 0) {
-                console.log(email)
-                console.log(password)
+
                 setMessage('')
                 setError('')
                 const formData = new FormData();
@@ -49,7 +48,7 @@ export default function LoginPage() {
                 formData.append("email", email.toLowerCase());
                 formData.append("password", password);
 
-                const res = await axios.post('/api/students', formData);
+                const res = await axios.post('/api/users', formData);
 
                 if (!res) {
 

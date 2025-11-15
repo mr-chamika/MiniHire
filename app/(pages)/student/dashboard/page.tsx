@@ -18,6 +18,7 @@ export default function Dashboard() {
     const router = useRouter();
 
     const [email, setEmail] = useState('');
+    const [role, setRole] = useState('');
 
     useEffect(() => {
 
@@ -34,7 +35,7 @@ export default function Dashboard() {
             const token: Token = jwtDecode(tokenString);
 
             setEmail(token.email);
-
+            setRole(token.role);
 
         }
 
@@ -48,6 +49,7 @@ export default function Dashboard() {
             This is the dashboard
 
             <p>Your email : {email}</p>
+            <p>Your are : {role}</p>
 
         </div>
 

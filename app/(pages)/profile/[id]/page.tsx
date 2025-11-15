@@ -32,7 +32,7 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
             try {
                 setId(id);
 
-                const res = await axios.get(`/api/students?id=${id}`)
+                const res = await axios.get(`/api/users?id=${id}`)
 
                 if (res.status != 200) {
 
