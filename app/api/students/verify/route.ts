@@ -1,3 +1,4 @@
+import { Company } from "@/models/Company";
 import { Student } from "@/models/Student";
 
 export async function POST(req: Request) {
@@ -6,8 +7,19 @@ export async function POST(req: Request) {
 
     const email = formData.get("email") as string;
     const otp = formData.get("otp");
+    const role = formData.get("role");
 
-    const user = await Student.findOne({ email }).select('-password');
+    let user = null;
+
+    if (role == "student") {
+
+        user = await Student.findOne({ email }).select('-password');
+
+    } else {
+
+        user = await Company.findOne({ email }).select('-password');
+
+    }
 
     if (!user) {
 

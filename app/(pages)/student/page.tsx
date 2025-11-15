@@ -102,7 +102,7 @@ export default function StudentSignup() {
             formData.append("email", email.toLowerCase());
             formData.append("otp", finalOtp);
 
-            const res = await axios.post('/api/students/verify', formData)
+            const res = await axios.post('/api/users/verify', formData)
 
             if (res.status == 200 && res.data.message == "Verified") {
                 setMessage("✅ OTP verified successfully!");
@@ -166,7 +166,7 @@ export default function StudentSignup() {
                 formData.append("degree", degree);
                 formData.append("university", university);
 
-                const res = await axios.post('/api/students', formData);
+                const res = await axios.post('/api/users', formData);
                 //automatically set headers to {'Content-Type':'multipart/form-data'} 
                 const data = res.data;
 
@@ -219,9 +219,9 @@ export default function StudentSignup() {
                 <div className="w-full flex justify-center">
                     <h1 className='md:text-5xl text-3xl font-semibold'>Welcome to MiniHire</h1>
                 </div>
-                <form onSubmit={handleSubmit} className="w-[90%] shadow-xl px-10 pt-10 pb-2 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
-                    <div className="flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full">
-                        <div className="sm:w-[50%] space-y-5">
+                <form onSubmit={handleSubmit} className="w-[82%] shadow-xl px-10 pt-10 pb-2 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
+                    <div className="gap-5 flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full ">
+                        <div className="sm:w-[50%] space-y-5 min-w-[145px]">
                             <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">First Name</label>
@@ -269,7 +269,7 @@ export default function StudentSignup() {
                                 </div>
                             </div>
                         </div>
-                        <div className="sm:w-[50%] space-y-5">
+                        <div className="sm:w-[50%] space-y-5 min-w-[145px]">
                             <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">University</label>
