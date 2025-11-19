@@ -44,13 +44,20 @@ export default function AuthTopbarLogged() {
 
     }
 
+    const redirect = async () => {
+
+        localStorage.removeItem("token");
+        route.replace('/');
+
+    }
+
     return (
         <>
             <div className="bg-green-300 fixed h-20 w-full px-4 flex-row justify-between flex">
 
-                <div className="items-center h-full flex">
+                <div onClick={redirect} className="items-center h-full flex">
 
-                    <Link href="/" className="bg-blue-600 p-3 rounded-lg text-white font-serif">MiniHire</Link>
+                    <p className="bg-blue-600 p-3 rounded-lg text-white font-serif">MiniHire</p>
 
                 </div>
 

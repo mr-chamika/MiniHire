@@ -61,6 +61,8 @@ export default function StudentSignup() {
     const [modal, setModal] = useState(false);
     const [otp, setOtp] = useState(Array(6).fill(""));
     const [message, setMessage] = useState("");
+    const [role, setRole] = useState("");
+
 
     const handleChange = (value: string, index: number) => {
         if (/^[0-9]?$/.test(value)) {
@@ -101,6 +103,8 @@ export default function StudentSignup() {
 
             formData.append("email", email.toLowerCase());
             formData.append("otp", finalOtp);
+            formData.append("role", role);
+
 
             const res = await axios.post('/api/users/verify', formData)
 
@@ -199,6 +203,8 @@ export default function StudentSignup() {
                 setErrorE('');
 
                 console.log('Signup Successed');
+
+                setRole(formData.get("role") as string);
 
                 setModal(true);
 

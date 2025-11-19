@@ -2,9 +2,10 @@
 
 import Modal from "@/app/components/Modal";
 import axios from "axios";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
-interface Student {
+interface User {
     _id: string;
     email: string;
     firstName: string;
@@ -15,12 +16,14 @@ interface Student {
     degree: string;
     university: string;
     verified: boolean;
+
+    logo: string;
 }
 
 export default function Profile({ params }: { params: Promise<{ id: string }> }) {
 
     const [id, setId] = useState('');
-    const [user, setUser] = useState<Student | null>(null)
+    const [user, setUser] = useState<User | null>(null)
     const [show, setShow] = useState(false);
 
     useEffect(() => {
@@ -64,11 +67,24 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
             {show &&
                 <Modal show={show} setShow={setShow}>
 
-                    <iframe
+                    {user?.resume?.endsWith('.pdf') ? <iframe
                         src={user?.resume}
                         className="w-full flex-grow h-[93vh]"
                         title="Hasith Wijesinghe CV"
                     />
+                        : user?.logo?.endsWith('.jpg') ?
+                            <div className="flex justify-center items-center h-screen">
+                                <div className="flex items-center justify-center bg-white w-56 h-56">
+                                    <Image src={user?.logo} alt="Your Logo" height={200} width={200} />
+                                </div>
+                            </div>
+                            :
+                            <div className="flex justify-center items-center h-screen">
+                                <div className="flex items-center justify-center bg-white w-96 h-48">
+                                    <p>Unsupported Format</p>
+                                </div>
+                            </div>
+                    }
 
                 </Modal>
             }

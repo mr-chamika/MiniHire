@@ -254,7 +254,15 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    const searchStudent = await Student.findOne({ _id: id });
+    let searchStudent = null;
+
+    searchStudent = await Student.findOne({ _id: id });
+
+    if (!searchStudent) {
+
+        searchStudent = await Company.findOne({ _id: id });
+
+    }
 
     return Response.json(searchStudent);
 
