@@ -23,6 +23,7 @@ export default function AuthTopbarLogged() {
     const route = useRouter();
 
     const [modal, setModal] = useState(false);
+    const [toLanding, setToLanding] = useState(false);
 
     const logout = async () => {
 
@@ -55,7 +56,7 @@ export default function AuthTopbarLogged() {
         <>
             <div className="bg-green-300 fixed h-20 w-full px-4 flex-row justify-between flex">
 
-                <div onClick={redirect} className="items-center h-full flex">
+                <div title="Back to landing page" onClick={() => setToLanding(true)} className="items-center h-full flex hover:cursor-pointer">
 
                     <p className="bg-blue-600 p-3 rounded-lg text-white font-serif">MiniHire</p>
 
@@ -69,6 +70,29 @@ export default function AuthTopbarLogged() {
                 </div>
 
             </div>
+
+            {toLanding &&
+
+                <Modal show={toLanding} setShow={setToLanding}>
+
+                    <div className="flex justify-center items-center h-screen">
+                        <div className="bg-white w-96 h-52 rounded-[30px] flex flex-col justify-around">
+
+                            <h1 className="text-center text-xl font-sans w-full">This action will automatically logout you from the application. Are you sure you want to allow this action ?</h1>
+
+                            <div className="w-full justify-around flex">
+
+                                <button onClick={redirect} className="border px-5 py-1 bg-green-500 border-green-300 text-white rounded-xl hover:bg-transparent hover:border-none hover:text-green-500 hover:font-bold">Confirm</button>
+                                <button onClick={() => setToLanding(false)} className="border px-5 py-1 bg-red-500 border-red-300 text-white rounded-xl hover:bg-transparent hover:border-none hover:text-red-500 hover:font-bold">Cancel</button>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </Modal>
+
+            }
 
             {modal &&
 
