@@ -1,5 +1,7 @@
 "use client"
 
+import CompanyDashboard from "@/app/components/CompanyDashboard";
+import StudentDashboard from "@/app/components/StudentDashboard";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -44,15 +46,27 @@ export default function Dashboard() {
     }, [])
 
     return (
-
         <div>
-            This is the dashboard
+            {role == "student" ?
 
-            <p>Your email : {email}</p>
-            <p>Your are : {role}</p>
+                <StudentDashboard
 
+                    email={email}
+                    role={role}
+
+                />
+
+                :
+
+                <CompanyDashboard
+
+                    email={email}
+                    role={role}
+
+                />
+
+            }
         </div>
-
     );
 
 }

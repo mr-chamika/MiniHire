@@ -103,7 +103,7 @@ export default function CompanySignup() {
             formData.append("role", role);
 
             const res = await axios.post('/api/users/verify', formData)
-            console.log(res)
+
             if (res.status == 200 && res.data.message == "Verified") {
                 setMessage("✅ OTP verified successfully!");
                 setOtp(Array(6).fill(""));
@@ -170,8 +170,6 @@ export default function CompanySignup() {
 
                 const res = await axios.post('/api/users', formData);
                 //automatically set headers to {'Content-Type':'multipart/form-data'} 
-
-                alert('hello')
 
                 const data = res.data;
 

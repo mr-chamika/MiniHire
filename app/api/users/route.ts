@@ -253,9 +253,35 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
+    const email = searchParams.get("email");
 
-    const searchStudent = await Student.findOne({ _id: id });
+    if (id) {
 
-    return Response.json(searchStudent);
+        let searchStudent = null;
+
+        searchStudent = await Student.findOne({ _id: id });
+
+        if (!searchStudent) {
+
+            searchStudent = await Company.findOne({ _id: id });
+
+        }
+
+        return Response.json(searchStudent);
+
+    } else if (email) {
+
+
+        const company = await Company.findOne({ email }, "name contactNumber");
+
+        if (!company) {
+
+            return;
+
+        }
+
+        return Response.json(company);
+
+    }
 
 }

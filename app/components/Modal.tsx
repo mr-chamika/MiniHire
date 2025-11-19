@@ -5,7 +5,7 @@ export default function Modal({ show, setShow, children }: { show: boolean, setS
     if (!show) return null;
 
     return (
-        <div className='fixed z-50 top-0 w-full h-full bg-black/80'>
+        <div className='fixed z-50 top-0 w-full h-full bg-black/90'>
             <div className="flex justify-end">
 
                 <button
