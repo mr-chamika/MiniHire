@@ -47,23 +47,26 @@ export default function Dashboard() {
 
     return (
         <div>
-            {role == "student" ?
+            {!role ?
 
-                <StudentDashboard
+                <p>Loading...</p> :
 
-                    email={email}
-                    role={role}
+                role == "student" ?
 
-                />
+                    <StudentDashboard
 
-                :
+                        email={email}
+                        role={role}
 
-                <CompanyDashboard
+                    />
 
-                    email={email}
-                    role={role}
+                    :
 
-                />
+                    <CompanyDashboard
+
+                        email={email}
+
+                    />
 
             }
         </div>

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
-import Image from "next/image";
 import axios from "axios";
 
-export default function CompanyDashboard({ email }: { email: string, role: string }) {
+export default function CompanyDashboard({ email }: { email: string }) {
 
     const roles = [
 
@@ -59,32 +58,39 @@ export default function CompanyDashboard({ email }: { email: string, role: strin
 
         const getNameAndContact = async () => {
 
-            const res = await axios.get(`/api/users?email=${email}`);
+            try {
 
-            if (res.status != 200) {
+                const res = await axios.get(`/api/users?email=${email}`);
 
-                alert('No such registered company');
-                return;
+                if (res.status != 200) {
+
+                    alert('No such registered company');
+                    return;
+
+                }
+
+                const data = res.data;
+
+                if (!data) {
+
+                    alert('Check connection issues');
+                    return;
+
+                }
+
+                setCompanyName(data.name);
+                setContact(data.contactNumber);
+
+            } catch (err) {
+
+                alert("Error fetching company: " + err);
 
             }
-
-            const data = res.data;
-
-            if (!data) {
-
-                alert('Check connection issues');
-                return;
-
-            }
-
-            setCompanyName(data.name);
-            setContact(data.contactNumber);
-
         }
 
         getNameAndContact();
 
-    }, [])
+    }, [email])
 
     return (
 
