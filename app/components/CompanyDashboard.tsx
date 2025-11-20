@@ -90,7 +90,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
         getNameAndContact();
 
-    }, [email])
+    }, [])
 
     return (
 
