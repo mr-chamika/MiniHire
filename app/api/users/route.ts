@@ -271,7 +271,6 @@ export async function GET(req: Request) {
 
     } else if (email) {
 
-
         const company = await Company.findOne({ email }, "name contactNumber");
 
         if (!company) {
