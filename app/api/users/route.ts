@@ -97,6 +97,7 @@ export async function POST(req: Request) {
 
                 return Response.json({ message: `OTP sent to ${email}` });
             }
+
         } else if (formData.has('companyName')) {//starting signup logic for company
 
 
@@ -238,6 +239,7 @@ export async function POST(req: Request) {
             }
 
             return Response.json({ token });
+
         }
 
     } catch (err) {
