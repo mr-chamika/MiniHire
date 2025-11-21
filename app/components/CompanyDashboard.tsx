@@ -3,6 +3,36 @@
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import Image from "next/image";
+import Post_Company from "./Post_Company";
+interface Token {
+
+    userId: string;
+    role: string;
+    verified: boolean;
+    email: string;
+
+}
+
+interface Post {
+
+    _id: string;
+    createdBy: string;
+    companyName: string;
+    companyAddress: string;
+    creatorName: string;
+    role: string;
+    contactNumber: string;
+    vacancies: Number;
+    recruited: Number;
+    type: string;
+    period: string;
+    description: string,
+    country: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
 export default function CompanyDashboard({ email }: { email: string }) {
 
@@ -47,58 +77,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [vacancies, setVacancies] = useState(1);
     const [desc, setDesc] = useState('');
 
-
-    const handleSubmit = async (e: any) => {
-
-        e.preventDefault();
-
-        try {
-
-            const formData = new FormData();
-
-            formData.append("companyName", companyName);
-            formData.append("contactNumber", contact);
-            formData.append("companyAddress", address);
-            formData.append("creatorName", creator);
-            formData.append("vacancies", vacancies.toString());
-            formData.append("role", role);
-            formData.append("type", type);
-            formData.append("period", period);
-            formData.append("country", country);
-            formData.append("description", desc);
-
-            const res = await axios.post('/api/users', formData)
-
-            if (res.status != 200) {
-
-                alert('Job post creation faild.');
-                return;
-
-            }
-
-            if (res.data.message) {
-
-                alert(res.data.message);
-
-            }
-
-            setModal(false);
-            setAddress('');
-            setCreator('');
-            setRole(roles[0].value);
-            setType(types[0].value);
-            setPeriod(periods[0].value);
-            setCountry(countries[0].value);
-            setVacancies(1);
-            setDesc('');
-
-        } catch (err) {
-
-            alert('Creating Job Post Failed.');
-
-        }
-
-    }
+    const [myPosts, setMyPosts] = useState<Post[] | null>(null)
 
     useEffect(() => {
 
@@ -134,13 +113,114 @@ export default function CompanyDashboard({ email }: { email: string }) {
             }
         }
 
-        getNameAndContact();
+        const getMyPosts = async () => {
 
-    }, [])
+            try {
+
+                const tokenString = localStorage.getItem("token");
+
+                if (!tokenString) { alert('Token not found. Try again..'); return; }
+
+                const token: Token = jwtDecode(tokenString);
+
+                const encoded = encodeURIComponent(token.userId);
+
+                const res = await axios.get(`/api/posts?by=${encoded}`);
+
+                if (res.status != 200) {
+
+                    alert('No such registered company');
+                    return;
+
+                }
+
+                const data = res.data;
+
+                if (!data) {
+
+                    alert('Check connection issues');
+                    setMyPosts([]);
+                    return;
+
+                }
+
+                setMyPosts(data);
+
+            } catch (err) {
+
+                alert("Error fetching company: " + err);
+
+            }
+        }
+
+        getNameAndContact();
+        getMyPosts();
+
+    }, [modal])
+
+    const handleSubmit = async (e: any) => {
+
+        e.preventDefault();
+
+        try {
+
+            const tokenString = localStorage.getItem("token");
+
+            if (!tokenString) { alert('Token not found. Try again..'); return; }
+
+            const token: Token = jwtDecode(tokenString);
+
+            const formData = new FormData();
+
+            formData.append("createdBy", token.userId);
+            formData.append("companyName", companyName);
+            formData.append("contactNumber", contact);
+            formData.append("companyAddress", address);
+            formData.append("creatorName", creator);
+            formData.append("vacancies", vacancies.toString());
+            formData.append("role", role);
+            formData.append("type", type);
+            formData.append("period", period);
+            formData.append("country", country);
+            formData.append("description", desc);
+
+            const res = await axios.post('/api/posts', formData)
+
+            if (res.status != 200) {
+
+                alert('Job post creation faild.');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            setModal(false);
+            setAddress('');
+            setCreator('');
+            setRole(roles[0].value);
+            setType(types[0].value);
+            setPeriod(periods[0].value);
+            setCountry(countries[0].value);
+            setVacancies(1);
+            setDesc('');
+
+        } catch (err) {
+
+            alert('Creating Job Post Failed.');
+
+        }
+
+    }
+
 
     return (
 
-        <div className="w-full">
+        <div className="w-full flex flex-col min-w-[400px]">
 
             <div className="mb-5 flex justify-end m-3">
                 <div onClick={() => setModal(true)} className="flex-row flex gap-[3px] border px-2 pr-3 items-center pb-[2px] rounded-xl bg-black text-white  hover:cursor-pointer hover:shadow-md shadow-gray-400">
@@ -149,17 +229,58 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between gap-2 px-2">
+            <div className="flex flex-col sm:flex-row justify-between gap-2 px-2 min-w-[400px]">
 
-                <section className="sm:w-[30%] w-full bg-yellow-50">
+                {/* shortlisted student list */}
+                <section className="sm:w-[25%] w-full bg-yellow-50">
                     <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Shortlist</p>
                 </section>
 
-                <section className=" sm:w-[70%] min-h-[79vh] w-full rounded-lg bg-blue-50">
+                {/* this company created job post list */}
+                <section className=" sm:w-[80%] min-h-[79vh] w-full rounded-lg bg-blue-50">
                     <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">My Posts</p>
+                    <div className="w-full h-[75vh]">
+                        {myPosts?.length == 0 ?
+
+                            <div className="h-full w-full flex justify-center items-center">
+
+                                <p className="opacity-50">No Posts Yet</p>
+
+                            </div>
+                            :
+                            <div>
+
+                                {myPosts?.map((post) => {
+
+                                    return (
+
+                                        <Post_Company
+
+                                            key={post._id}
+                                            _id={post._id}
+                                            role={post.role}
+                                            type={post.type}
+                                            description={post.description}
+                                            period={post.period}
+                                            recruited={post.recruited.toString()}
+                                            vacancies={post.vacancies.toString()}
+                                            creatorName={post.creatorName}
+                                            createdAt={post.createdAt}
+
+                                        />
+
+                                    )
+
+                                })}
+
+                            </div>
+
+                        }
+                    </div>
                 </section>
 
-                <section className="sm:w-[30%] w-full bg-yellow-50">
+                {/* applications list received by students */}
+                <section className="sm:w-[25%] w-full bg-yellow-50">
                     <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Applications</p>
                 </section>
 
@@ -253,8 +374,8 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
                                     <div className="w-full flex flex-col pb-2">
 
-                                        <label className="text-lg text-gray-500">Description {desc.length}/100</label>
-                                        <input type="text" value={desc} maxLength={100} onChange={(e) => setDesc(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                        <label className="text-lg text-gray-500">Description {desc.length}/150</label>
+                                        <input required type="text" value={desc} minLength={100} maxLength={150} onChange={(e) => setDesc(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
                                     </div>
                                 </div>

@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 import emailjs from "@emailjs/nodejs";
 import jwt from "jsonwebtoken";
 import { Company } from "@/models/Company";
-import { Post } from "@/models/Post";
 
 export async function POST(req: Request) {
 
@@ -98,43 +97,6 @@ export async function POST(req: Request) {
 
                 return Response.json({ message: `OTP sent to ${email}` });
             }
-
-        } else if (formData.has("creatorName")) {//job post creating logic
-
-            const companyName = formData.get("companyName");
-            const contactNumber = formData.get("contactNumber");
-            const companyAddress = formData.get("companyAddress");
-            const creatorName = formData.get("creatorName");
-            const vacancies = formData.get("vacancies");
-            const role = formData.get("role");
-            const type = formData.get("type");
-            const period = formData.get("period");
-            const country = formData.get("country");
-            const description = formData.get("description");
-
-            const newpost = await Post.create({
-
-                companyName,
-                contactNumber,
-                companyAddress,
-                creatorName,
-                vacancies,
-                role,
-                type,
-                period,
-                country,
-                description
-
-            })
-
-            if (!newpost) {
-
-                return Response.json({ message: "Check your connnection. Failed to create Job Post." });
-
-            }
-
-            return Response.json({ message: "Job Post Created Successfully" });
-
 
         } else if (formData.has('companyName')) {//starting signup logic for company
 
