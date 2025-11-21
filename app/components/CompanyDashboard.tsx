@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import axios from "axios";
@@ -50,7 +52,51 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
         e.preventDefault();
 
-        alert('submitted');
+        try {
+
+            const formData = new FormData();
+
+            formData.append("companyName", companyName);
+            formData.append("contactNumber", contact);
+            formData.append("companyAddress", address);
+            formData.append("creatorName", creator);
+            formData.append("vacancies", vacancies.toString());
+            formData.append("role", role);
+            formData.append("type", type);
+            formData.append("period", period);
+            formData.append("country", country);
+            formData.append("description", desc);
+
+            const res = await axios.post('/api/users', formData)
+
+            if (res.status != 200) {
+
+                alert('Job post creation faild.');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            setModal(false);
+            setAddress('');
+            setCreator('');
+            setRole(roles[0].value);
+            setType(types[0].value);
+            setPeriod(periods[0].value);
+            setCountry(countries[0].value);
+            setVacancies(1);
+            setDesc('');
+
+        } catch (err) {
+
+            alert('Creating Job Post Failed.');
+
+        }
 
     }
 
@@ -141,12 +187,12 @@ export default function CompanyDashboard({ email }: { email: string }) {
                                     <div className="w-full flex flex-col pb-2">
 
                                         <label className="text-lg text-gray-500">Address</label>
-                                        <input required type="email" value={address} onChange={(e) => setAddress(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                        <input required type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
                                     </div>
                                     <div className="w-full flex flex-col pb-2">
 
                                         <label className="text-lg text-gray-500">Your Name</label>
-                                        <input required type="email" value={creator} onChange={(e) => setCreator(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                        <input required type="text" value={creator} onChange={(e) => setCreator(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
                                     </div>
                                     <div className="w-full flex flex-col pb-2">
 
