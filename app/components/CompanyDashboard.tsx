@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import Image from "next/image";
 import Post_Company from "./Post_Company";
 interface Token {
 
