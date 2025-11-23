@@ -56,7 +56,6 @@ export default function Dashboard() {
                     <StudentDashboard
 
                         email={email}
-                        role={role}
 
                     />
 

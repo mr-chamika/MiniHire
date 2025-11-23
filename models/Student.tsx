@@ -1,4 +1,4 @@
-import mongoose, { models, Schema } from "mongoose";
+import mongoose, { models, ObjectId, Schema } from "mongoose";
 
 const StudentSchema = new Schema({
 
@@ -12,6 +12,7 @@ const StudentSchema = new Schema({
     portfolio: { type: String, required: true },
     linkedin: { type: String, required: true },
     resume: { type: String, required: true },
+    saved: Array<ObjectId>,
     otp: String,
     expires: Date,
     verified: { type: Boolean, default: false }

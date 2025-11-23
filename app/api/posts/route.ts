@@ -1,5 +1,6 @@
 import { Database } from "@/db";
 import { Post } from "@/models/Post";
+import { Student } from "@/models/Student";
 
 export async function POST(req: Request) {
 
@@ -55,15 +56,96 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("by");
+    const to = searchParams.get("to");
+    const email = searchParams.get("saved");
 
-    const postSet = await Post.find({ createdBy: userId });
+    if (userId) {
 
-    if (!postSet) {
+        const postSet = await Post.find({ createdBy: userId });
 
-        return Response.json([]);
+        if (!postSet) {
+
+            return Response.json([]);
+
+        }
+
+        return Response.json(postSet);
+
+    } else if (to == "toStudents") {
+
+        const postSet = await Post.find({ $expr: { $ne: ["$vacancies", "$recruited"] } }, "_id companyName contactNumber role type period description createdAt");
+
+        if (!postSet) {
+
+            return Response.json([]);
+
+        }
+
+        return Response.json(postSet);
+
+    } else if (email) {
+
+        const student = await Student.findOne({ email });
+
+        const postSet = await Post.find({ _id: { $in: student.saved } });
+
+        if (!postSet) {
+
+            return Response.json([]);
+
+        }
+
+        return Response.json({ postSet, saved: student.saved });
+
+    }
+}
+
+export async function PUT(req: Request) {
+
+    await Database();
+
+    const formData = await req.formData();
+
+    const _id = formData.get("id");
+    const email = formData.get("email");
+
+    if (_id && email) {
+
+        const student = await Student.findOne({ email });
+
+        if (!student) {
+
+            return Response.json({ message: 'No such student exists' });
+
+        }
+
+        const post = await Post.findOne({ _id });
+
+        if (!post) {
+
+            return Response.json({ message: 'No such post exists' });
+
+        }
+
+        const isExists = student.saved.includes(_id);
+
+        if (isExists) {
+
+            student.saved.pull(_id);
+
+        } else {
+
+            student.saved.addToSet(_id);
+
+        }
+
+
+        await student.save();
+
+
+        return Response.json({ done: 'true' });
 
     }
 
-    return Response.json(postSet);
 
 }
