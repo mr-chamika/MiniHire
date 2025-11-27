@@ -29,7 +29,7 @@ export default function Post_Company({ _id, role, type, description, period, rec
             <p className="italic text-sm px-5 min-w-[50%] text-justify py-3">{description}</p>
 
             <div className="px-4 w-full flex flex-row justify-between">
-                <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-lg'>
+                <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[80%] text-sm sm:text-lg'>
                     <div className="flex flex-col items-center mb-3 sm:mb-0 sm:flex-row gap-1 h-4">
                         <Image src={Clock} alt="period" width={16} />
                         <p className="font-bold flex items-center">{period[0]} {period.endsWith("m") ? "Months" : "Years"}</p>
@@ -42,12 +42,12 @@ export default function Post_Company({ _id, role, type, description, period, rec
 
                     <div className="flex flex-col items-center mb-3 sm:mb-0 sm:flex-row gap-1 h-4">
                         <Image src={Created} alt="contact no" width={16} />
-                        <p className="font-bold flex items-center">{creatorName.length > 14 ? creatorName.slice(0, 14) + "..." : creatorName}</p>
+                        <p className="font-bold flex items-center">{creatorName.length > 14 ? creatorName.slice(0, 14) + "..." : creatorName.split(" ")[0]}</p>
                     </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-0 sm:gap-1 h-4 items-center">
                     <p className=" text-sm items-start">{days[new Date(createdAt).getDay()]},</p>
-                    <p className=" text-sm items-start">{new Date(createdAt).getDay()} {months[new Date(createdAt).getMonth()]}</p>
+                    <p className=" text-sm items-start">{new Date(createdAt).getDate()} {months[new Date(createdAt).getMonth()]}</p>
                 </div>
 
             </div>
