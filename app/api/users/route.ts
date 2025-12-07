@@ -256,6 +256,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     const email = searchParams.get("email");
+    const email_toApply = searchParams.get("toApply");
 
     if (id) {
 
@@ -282,6 +283,18 @@ export async function GET(req: Request) {
         }
 
         return Response.json(company);
+
+    } else if (email_toApply) {
+
+        const student = await Student.findOne({ email: email_toApply }, "firstName lastName university degree portfolio linkedin resume");
+
+        if (!student) {
+
+            return;
+
+        }
+
+        return Response.json(student);
 
     }
 

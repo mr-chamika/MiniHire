@@ -1,6 +1,8 @@
 import { Database } from "@/db";
 import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
+import { put } from "@vercel/blob";
+import { error } from "console";
 
 export async function POST(req: Request) {
 
@@ -18,8 +20,18 @@ export async function POST(req: Request) {
         const role = formData.get("role");
         const type = formData.get("type");
         const period = formData.get("period");
-        const country = formData.get("country");
+        const file = formData.get("jd") as File;
         const description = formData.get("description");
+
+        if (!createdBy || !companyName || !contactNumber || !companyAddress || !creatorName || !vacancies || !role || !type || !period || !file || !description) {
+
+            return Response.json({ error: 'All fields are required' });
+
+        }
+
+        //convert cv to byte sequence and save it in blob storage in vercel
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const blob = await put(file.name, buffer, { access: 'public', addRandomSuffix: true, contentType: file.type })
 
         const newpost = await Post.create({
 
@@ -32,7 +44,7 @@ export async function POST(req: Request) {
             role,
             type,
             period,
-            country,
+            jd: blob.url,
             description
 
         })
@@ -58,6 +70,7 @@ export async function GET(req: Request) {
     const userId = searchParams.get("by");
     const to = searchParams.get("to");
     const email = searchParams.get("saved");
+    const _id = searchParams.get("id");
 
     if (userId) {
 
@@ -96,6 +109,19 @@ export async function GET(req: Request) {
         }
 
         return Response.json({ postSet, saved: student.saved });
+
+    } else if (_id) {
+
+        const post = await Post.findOne({ _id });
+
+        if (!post) {
+
+            return Response.json({ message: 'No such post exists' });
+
+        }
+
+
+        return Response.json({ jd: post.jd });
 
     }
 }

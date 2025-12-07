@@ -13,7 +13,7 @@ const PostSchema = new Schema({
     type: { type: String, required: true },//onsite,hybrid,remote
     period: { type: String, required: true },//6 months or 1 year
     description: String,
-    country: { type: String, required: true },//which country's interns looking for?
+    jd: { type: String, required: true },//job description image
 
 }, { timestamps: true })
 

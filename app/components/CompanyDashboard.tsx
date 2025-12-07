@@ -72,7 +72,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [role, setRole] = useState(roles[0].value);
     const [type, setType] = useState(types[0].value);
     const [period, setPeriod] = useState(periods[0].value);
-    const [country, setCountry] = useState(countries[0].value);
+    const [jd, setJd] = useState<File | null>(null);
     const [vacancies, setVacancies] = useState(1);
     const [desc, setDesc] = useState('');
 
@@ -163,6 +163,8 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
         try {
 
+            if (!jd) { alert('please upload your job description....'); return; }
+
             const tokenString = localStorage.getItem("token");
 
             if (!tokenString) { alert('Token not found. Try again..'); return; }
@@ -180,7 +182,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
             formData.append("role", role);
             formData.append("type", type);
             formData.append("period", period);
-            formData.append("country", country);
+            formData.append("jd", jd);
             formData.append("description", desc);
 
             const res = await axios.post('/api/posts', formData)
@@ -204,7 +206,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
             setRole(roles[0].value);
             setType(types[0].value);
             setPeriod(periods[0].value);
-            setCountry(countries[0].value);
+            setJd(null);
             setVacancies(1);
             setDesc('');
 
@@ -236,9 +238,9 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 </section>
 
                 {/* this company created job post list */}
-                <section className=" sm:w-[80%] min-h-[79vh] w-full rounded-lg bg-blue-50">
+                <section className="sm:w-[80%] min-h-[79vh] w-full rounded-lg bg-blue-50">
                     <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">My Posts</p>
-                    <div className="w-full h-[75vh]">
+                    <div className="overflow-y-auto scroll-smooth w-full h-[70vh]">
                         {myPosts?.length == 0 ?
 
                             <div className="h-full w-full flex justify-center items-center">
@@ -360,14 +362,8 @@ export default function CompanyDashboard({ email }: { email: string }) {
                                     </div>
                                     <div className="w-full flex flex-col pb-2">
 
-                                        <label className="text-lg text-gray-500">Country of candidates</label>
-                                        <select value={country} onChange={(e) => setCountry(e.target.value)} className="[&::-webkit-scrollbar]:hidden inline-block hover:cursor-pointer appearance-none outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200" >
-
-                                            {countries.map((country) => (
-
-                                                <option key={country.value} value={country.value}>{country.label}</option>
-                                            ))}
-                                        </select>
+                                        <label className="text-lg text-gray-500">Job Description</label>
+                                        <input required type="file" accept="image/jpeg" onChange={(e) => { e.target.files && e.target.files.length > 0 && setJd(e.target.files[0]) }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
                                     </div>
 

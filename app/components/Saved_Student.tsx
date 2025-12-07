@@ -7,7 +7,7 @@ import On from '../../public/assets/yes.png';
 import Off from '../../public/assets/no.png';
 import { useState } from 'react';
 
-export default function Saved_Student({ _id, role, type, description, createdAt, mark }: { _id: string, role: string, type: string, description: string, createdAt: string, mark: () => void }) {
+export default function Saved_Student({ _id, role, type, description, createdAt, mark, showJd }: { _id: string, role: string, type: string, description: string, createdAt: string, mark: () => void, showJd: () => void }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -32,12 +32,12 @@ export default function Saved_Student({ _id, role, type, description, createdAt,
             <div className="px-4 w-full flex flex-row justify-between items-center">
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-lg'>
 
-                    <button className="w-full bg-green-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">View Now</button>
+                    <button onClick={showJd} className="w-full bg-green-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">View Now</button>
 
                 </div>
                 <div className="flex flex-row w-full h-4 items-center justify-end">
                     <p className=" text-sm items-start">{days[new Date(createdAt).getDay()]},</p>
-                    <p className=" text-sm items-start">{new Date(createdAt).getDay()} {months[new Date(createdAt).getMonth()]}</p>
+                    <p className=" text-sm items-start">{new Date(createdAt).getDate()} {months[new Date(createdAt).getMonth()]}</p>
                 </div>
 
             </div>
