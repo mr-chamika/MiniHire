@@ -7,6 +7,7 @@ import Post_Student from "./Post_Student";
 import Saved_Student from "./Saved_Student";
 import Modal from "./Modal";
 import Image from "next/image";
+import Application from "./Application";
 interface Token {
 
     userId: string;
@@ -41,17 +42,33 @@ interface Form {
     post_id: string;
 
 }
+interface Application {
+
+    //details of post
+    role: string;
+    contactNumber: string;
+    period: string;
+    type: string;
+    post_id: string;
+
+    //details of application
+    createdAt: string;
+    status: string;
+
+}
 
 export default function StudentDashboard({ email }: { email: string }) {
 
     const [posts, setPosts] = useState<Post[] | null>(null)
     const [saved, setSaved] = useState<Post[] | null>(null)
+    const [applications, setApplications] = useState<Application[] | null>(null)
     const [savedList, setSavedList] = useState([""]);
     const [isFav, setIsFav] = useState(false);
     const [showJd, setShowJd] = useState(false);
     const [jd, setJd] = useState('');
     const [isProceeding, setIsproceeding] = useState(false);
     const [inResume, setInResume] = useState(false);
+    const [hide, setHide] = useState(false);
 
     //for application form
 
@@ -112,6 +129,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         setShowJd(false);
         setIsproceeding(false);
+        setHide(false);
 
     }
 
@@ -164,7 +182,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }
 
-    const showJD = async (id: string) => {//to show the job description after click on the student post Card
+    const showJD = async (id: string, x = "") => {//to show the job description after click on the student post Card
 
         try {
 
@@ -192,6 +210,8 @@ export default function StudentDashboard({ email }: { email: string }) {
                 return;
 
             }
+
+            if (x != "") { setHide(true) };
 
             setJd(res.data.jd);
             setData(prev => ({ ...prev, post_id: id }))
@@ -332,10 +352,47 @@ export default function StudentDashboard({ email }: { email: string }) {
             }
         }
 
+        const getApplications = async () => {//to get applications sent by user
+
+            const encoded = encodeURIComponent(email);
+
+            try {
+
+                const res = await axios.get(`/api/applications?fo=${encoded}`);
+
+                if (res.status != 200) {
+
+                    alert('No applications sent');
+                    return;
+
+                }
+
+                const data = res.data;
+
+                if (!data) {
+
+                    alert('Check connection issues');
+                    setApplications([]);
+                    return;
+
+                }
+
+                setApplications(data);
+
+            } catch (err) {
+
+                alert("Error fetching posts: " + err);
+                setApplications([]);
+
+            }
+
+        }
+
         getPosts();
         getSaved();
+        getApplications();
 
-    }, [isFav])
+    }, [isFav, showJd])
 
     return (
         <>
@@ -430,8 +487,47 @@ export default function StudentDashboard({ email }: { email: string }) {
                     </section>
 
                     {/* applications list received by students */}
-                    <section className="sm:w-[25%] w-full bg-yellow-50">
+                    <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                         <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Sent</p>
+
+                        <div className="w-full h-[75vh]">
+                            {applications?.length == 0 ?
+
+                                <div className="h-full w-full flex justify-center items-center">
+
+                                    <p className="opacity-50">No Applications Yet</p>
+
+                                </div>
+                                :
+                                <div>
+
+                                    {applications?.map((application) => {
+
+                                        return (
+
+                                            <Application
+
+                                                key={application.post_id}
+                                                _id={application.post_id}
+                                                role={application.role}
+                                                type={application.type}
+                                                status={application.status}
+                                                createdAt={application.createdAt}
+                                                contact={application.contactNumber}
+                                                period={application.period}
+                                                showJd={() => showJD(application.post_id, "hide")}
+
+                                            />
+
+                                        )
+
+                                    })}
+
+                                </div>
+
+                            }
+                        </div>
+
                     </section>
 
                 </div>
@@ -513,7 +609,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                             </form>
                         }
 
-                        <div onClick={isProceeding ? handleSubmit : proceed} className="w-[50%] sm:w-[38%] py-2 flex justify-center items-center text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">{isProceeding ? 'Submit' : 'Proceed'}</div>
+                        {!hide && <div onClick={isProceeding ? handleSubmit : proceed} className="w-[50%] sm:w-[38%] py-2 flex justify-center items-center text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">{isProceeding ? 'Submit' : 'Proceed'}</div>}
                     </div>
                 </Modal>
             }

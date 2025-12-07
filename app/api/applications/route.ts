@@ -1,6 +1,8 @@
 import { Database } from "@/db";
 import { Application } from "@/models/Application";
+import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
+import { URL } from "url";
 
 export async function POST(req: Request) {
 
@@ -59,10 +61,49 @@ export async function POST(req: Request) {
     
 }
 
-// export async function GET(req: Request) {
+export async function GET(req: Request) {
 
+    await Database();
+
+    const {searchParams} = new URL(req.url);
+    const fo = searchParams.get("fo");
+
+    if(fo){
+
+const applications = await Application.find({email:fo}, "createdAt status post_id");
+//const postSet = await Application.find({$and:[{email:fo},{ $expr: { $ne: ["$vacancies", "$recruited"] } }]}, "contactNumber role type period jd");
+
+        if (!applications) {
+
+            return Response.json([]);
+
+        }
+
+        let toReturn = [];
+
+        for(const app of applications){
+
+            let post = await Post.findOne({_id:app.post_id},"role contactNumber jd period type");
+
+            toReturn.push({
+
+            role:post.role,
+            contactNumber:post.contactNumber,
+            period:post.period,
+            type:post.type,
+            createdAt:app.createdAt,
+            status:app.status,
+            post_id:app.post_id
+
+            })
+
+        }
+
+        return Response.json(toReturn);
+
+    }
     
-// }
+}
 
 // export async function PUT(req: Request) {
 
