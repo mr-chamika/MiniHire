@@ -2,7 +2,7 @@ import Image from "next/image";
 import Clock from '../../public/assets/clock.png';
 import Contact from '../../public/assets/contact.png';
 
-export default function Application({ _id, role, type, status, createdAt, showJd, contact, period }: { _id: string, role: string, type: string, status: string, createdAt: string, showJd: () => void, contact: string, period: string }) {
+export default function Application({ _id, role, type, status, createdAt, showJd, contact, period, cancel }: { _id: string, role: string, type: string, status: string, createdAt: string, showJd: () => void, contact: string, period: string, cancel: () => void }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -41,7 +41,7 @@ export default function Application({ _id, role, type, status, createdAt, showJd
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-lg'>
 
                     <button onClick={showJd} className="w-full bg-green-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">View</button>
-                    {status != "cancelled" && <button onClick={() => alert('cancelling')} className="w-full bg-red-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
+                    {status != "cancelled" && <button onClick={cancel} className="w-full bg-red-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
 
                 </div>
                 <div className="flex flex-row w-full h-4 items-start justify-end">

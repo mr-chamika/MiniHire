@@ -52,6 +52,7 @@ interface Application {
     post_id: string;
 
     //details of application
+    _id: string;
     createdAt: string;
     status: string;
 
@@ -269,6 +270,50 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }
 
+    const cancel = async (id: string) => {
+
+        const encoded = encodeURIComponent("cancel");
+
+        const formData = new FormData();
+
+        formData.append("id", id);
+        formData.append("operation", encoded);
+
+        try {
+
+            const res = await axios.put('/api/applications', formData);
+
+            if (res.status != 200) {
+
+                alert('Check your connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+                return;
+
+            }
+
+            if (res.data.done == 'true') {
+
+                alert('Application cancelled sucessfully.');
+                setIsFav(!isFav);
+
+            }
+
+        } catch (err) {
+
+            alert("Failed to cancel sent application...");
+            return;
+
+        }
+
+
+    }
+
     useEffect(() => {
 
         const getSaved = async () => {
@@ -474,6 +519,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 saved={savedList}
                                                 showJd={() => showJD(post._id)}
                                                 toApply={() => toApply(post._id)}
+
                                             />
 
                                         )
@@ -490,7 +536,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                         <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Sent</p>
 
-                        <div className="w-full h-[75vh]">
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden">
                             {applications?.length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
@@ -507,7 +553,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                                             <Application
 
-                                                key={application.post_id}
+                                                key={application._id}
                                                 _id={application.post_id}
                                                 role={application.role}
                                                 type={application.type}
@@ -516,6 +562,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 contact={application.contactNumber}
                                                 period={application.period}
                                                 showJd={() => showJD(application.post_id, "hide")}
+                                                cancel={() => cancel(application._id)}
 
                                             />
 
