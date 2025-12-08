@@ -464,7 +464,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                     {/* shortlisted student list */}
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                         <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Saved</p>
-                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden">
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
                             {saved?.length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
@@ -505,7 +505,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                     {/* this company created job post list */}
                     <section className=" sm:w-[80%] sm:min-w-[500px] min-h-[79vh] w-full rounded-lg bg-blue-50">
                         <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Recently Posted</p>
-                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth">
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth scrollbar-hide">
                             {posts?.length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
@@ -563,7 +563,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                             </select>
                         </div>
 
-                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden">
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
                             {applications?.filter((app) => app.status == filter).length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
@@ -610,7 +610,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             {showJd &&
                 <Modal show={showJd} setShow={closeSubmission}>
-                    <div className="py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center">
+                    <div className={`py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center scrollbar-thin scrollbar-hide`}>
                         <div className="w-full h-[85vh]">
                             {jd?.endsWith('.jpg') &&
                                 <div className="flex justify-center items-center w-full">

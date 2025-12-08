@@ -11,7 +11,7 @@ export default function Signup() {
 
     return (
 
-        <div className="min-h-screen w-full px-10 py-3">
+        <div className="h-screen w-full px-10 py-3 overflow-y-auto scrollbar-hide">
 
             <div className=" w-full flex justify-center sm:mb-10">
                 <h1 className='sm:text-6xl text-3xl font-semibold'>Choose Your Role First</h1>
