@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Image from "next/image";
 
@@ -15,6 +15,7 @@ interface Token {
     role: string;
     verified: boolean;
     email: string;
+    name: string;
 
 }
 
@@ -24,6 +25,19 @@ export default function AuthTopbarLogged() {
 
     const [modal, setModal] = useState(false);
     const [toLanding, setToLanding] = useState(false);
+    const [name, setName] = useState('');
+
+    useEffect(() => {
+
+        const tokenString = localStorage.getItem("token");
+
+        if (!tokenString) { alert('token not found'); return; };
+
+        const token: Token = jwtDecode(tokenString);
+
+        setName(token.name);
+
+    }, [])
 
     const logout = async () => {
 
@@ -59,6 +73,12 @@ export default function AuthTopbarLogged() {
                 <div title="Back to landing page" onClick={() => setToLanding(true)} className="items-center h-full flex hover:cursor-pointer">
 
                     <p className="bg-blue-600 p-3 rounded-lg text-white font-serif">MiniHire</p>
+
+                </div>
+
+                <div className="w-[80%] flex justify-center items-center">
+
+                    <p className="text-3xl font-bold font-[Montserrat]">Welcome {name.charAt(0).toUpperCase() + name.slice(1)} !</p>
 
                 </div>
 

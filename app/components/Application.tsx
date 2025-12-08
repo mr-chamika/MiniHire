@@ -5,7 +5,7 @@ import Contact from '../../public/assets/contact.png';
 export default function Application({ _id, role, type, status, createdAt, showJd, contact, period, cancel }: { _id: string, role: string, type: string, status: string, createdAt: string, showJd: () => void, contact: string, period: string, cancel: () => void }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return (
 
@@ -16,7 +16,7 @@ export default function Application({ _id, role, type, status, createdAt, showJd
                 <p>{role == "SE" ? "Software Engineering Intern" : role == "QA" ? "Quality Assuarance Intern" : "N/A"} | {type == "remote" ? "Remote" : type == "hybrid" ? "Hybrid" : "Onsite"}</p>
                 <div className="flex flex-row justify-between">
 
-                    <button className={`px-1 pb-1 font-bold rounded-lg text-white ${status == 'pending' ? 'bg-yellow-400' : status == 'cancelled' ? 'bg-red-400' : 'bg-green-400'}`}>{status}</button>
+                    <button className={`px-1 pb-1 font-bold rounded-lg text-white ${status == 'pending' ? 'bg-yellow-400' : status == 'cancelled' ? 'bg-red-400' : status == 'rejected' ? 'bg-black' : 'bg-green-400'}`}>{status}</button>
 
                 </div>
 
@@ -37,11 +37,11 @@ export default function Application({ _id, role, type, status, createdAt, showJd
 
             </div>
 
-            <div className="w-full flex flex-row justify-between items-center">
-                <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-lg'>
+            <div className="w-full flex flex-row justify-between items-center mt-1">
+                <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-[15px]'>
 
-                    <button onClick={showJd} className="w-full bg-green-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">View</button>
-                    {status != "cancelled" && <button onClick={cancel} className="w-full bg-red-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
+                    <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">{status == 'cancelled' ? 'Reapply' : 'View'}</button>
+                    {!["cancelled", "rejected"].includes(status) && <button onClick={cancel} className="w-[50%] bg-red-400 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
 
                 </div>
                 <div className="flex flex-row w-full h-4 items-start justify-end">

@@ -229,7 +229,9 @@ export async function POST(req: Request) {
                 userId: user._id,
                 role: user.role,
                 verified: user.verified,
-                email: user.email
+                email: user.email,
+                name: user.name || user.firstName,
+
             }, process.env.JWT_SECRET, { expiresIn: '1d' })
 
             if (!token) {

@@ -5,9 +5,8 @@ import Contact from '../../public/assets/contact.png';
 import Image from 'next/image';
 import On from '../../public/assets/yes.png';
 import Off from '../../public/assets/no.png';
-import axios from 'axios';
 
-export default function Post_Student({ _id, role, type, description, period, contactNumber, createdAt, companyName, mark, saved, showJd, toApply }: { _id: string, role: string, type: string, description: string, period: string, contactNumber: string, createdAt: string, companyName: string, mark: () => void, saved: string[], showJd: () => void, toApply: () => void }) {
+export default function Post_Student({ _id, role, type, description, period, contactNumber, createdAt, companyName, mark, saved, showJd, toApply, isApplied }: { _id: string, role: string, type: string, description: string, period: string, contactNumber: string, createdAt: string, companyName: string, mark: () => void, saved: string[], showJd: () => void, toApply: () => void, isApplied: boolean }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -22,7 +21,7 @@ export default function Post_Student({ _id, role, type, description, period, con
                 <div className="flex flex-row justify-between gap-2">
 
                     <button className="px-2 rounded-lg text-white" onClick={mark}><Image src={saved.includes(_id) ? On : Off} alt="fav icon" width={22} /></button>
-                    <button className="bg-green-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border" onClick={toApply}>Apply</button>
+                    <button className="bg-green-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border" onClick={toApply}>{isApplied ? 'View' : 'Apply'}</button>
 
                 </div>
 

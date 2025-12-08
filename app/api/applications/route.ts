@@ -35,6 +35,18 @@ export async function POST(req: Request) {
 
         }
 
+        const cancelledApplications = await Application.find({ post_id: post_id, status: 'cancelled' });
+
+        if (cancelledApplications.length > 0) {
+
+            for (const app of cancelledApplications) {
+
+                await app.deleteOne();
+
+            }
+
+        }
+
         const application = await Application.create({
 
             firstName,
@@ -126,8 +138,6 @@ export async function PUT(req: Request) {
     const id = formData.get("id");
     const operation = formData.get("operation");
 
-    console.log(id)
-
     const application = await Application.findOne({ _id: id });
 
     if (!operation) {
@@ -145,11 +155,33 @@ export async function PUT(req: Request) {
 
     if (operation == "cancel") {
 
-        application.status = "cancelled";
+        if (application.status == 'selected') {//cv s that rejected by comapny or cancel by student after selected can not be reapply.
+
+            application.status = "rejected";
+
+            const student = await Student.findOne({ email: application.email })
+
+            student.saved.pull(application.post_id);
+
+            await student.save();
+
+        } else {
+
+            application.status = "cancelled";
+
+        }
+
         application.save();
+
         return Response.json({ done: 'true' });
 
     }
     return Response.json({ done: 'false' });
+
+}
+
+export async function DELETE(req: Request) {
+
+
 
 }
