@@ -1,8 +1,8 @@
+import { Application } from "@/models/Application";
 import { Database } from "@/db";
 import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
 import { put } from "@vercel/blob";
-import { error } from "console";
 
 export async function POST(req: Request) {
 
@@ -84,9 +84,13 @@ export async function GET(req: Request) {
 
         return Response.json(postSet);
 
-    } else if (to == "toStudents") {
+    } else if (to?.includes("toStudents")) {
 
-        const postSet = await Post.find({ $expr: { $ne: ["$vacancies", "$recruited"] } }, "_id companyName contactNumber role type period description createdAt");
+        const email = to.split(" ")[1];
+
+        const rejected = await Application.find({ $and: [{ email: email }, { status: "rejected" }] }).distinct("post_id");
+
+        const postSet = await Post.find({ _id: { $nin: rejected }, $expr: { $ne: ["$vacancies", "$recruited"] } }, "_id companyName contactNumber role type period description createdAt");
 
         if (!postSet) {
 

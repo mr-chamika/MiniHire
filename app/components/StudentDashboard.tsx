@@ -52,6 +52,7 @@ interface Application {
     post_id: string;
 
     //details of application
+    _id: string;
     createdAt: string;
     status: string;
 
@@ -69,6 +70,7 @@ export default function StudentDashboard({ email }: { email: string }) {
     const [isProceeding, setIsproceeding] = useState(false);
     const [inResume, setInResume] = useState(false);
     const [hide, setHide] = useState(false);
+    const [filter, setFilter] = useState("pending");
 
     //for application form
 
@@ -85,9 +87,9 @@ export default function StudentDashboard({ email }: { email: string }) {
         }
     );
 
-    const toApply = async (id: string) => {//use of Apply button
+    const toApply = async (id: string, x = "") => {//use of Apply button
 
-        await showJD(id);
+        await showJD(id, x);
         await proceed();
 
     }
@@ -211,7 +213,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             }
 
-            if (x != "") { setHide(true) };
+            if (["pending", "selected"].includes(x)) { proceed() }
+            if (["rejected", "selected", "pending"].includes(x)) { setHide(true) }
 
             setJd(res.data.jd);
             setData(prev => ({ ...prev, post_id: id }))
@@ -269,6 +272,50 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }
 
+    const cancel = async (id: string) => {
+
+        const encoded = encodeURIComponent("cancel");
+
+        const formData = new FormData();
+
+        formData.append("id", id);
+        formData.append("operation", encoded);
+
+        try {
+
+            const res = await axios.put('/api/applications', formData);
+
+            if (res.status != 200) {
+
+                alert('Check your connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+                return;
+
+            }
+
+            if (res.data.done == 'true') {
+
+                alert('Application cancelled sucessfully.');
+                setIsFav(!isFav);
+
+            }
+
+        } catch (err) {
+
+            alert("Failed to cancel sent application...");
+            return;
+
+        }
+
+
+    }
+
     useEffect(() => {
 
         const getSaved = async () => {
@@ -321,7 +368,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 // const encoded = encodeURIComponent(token.userId);
 
-                const encoded = encodeURIComponent("toStudents");
+                const encoded = encodeURIComponent("toStudents " + email);
 
                 const res = await axios.get(`/api/posts?to=${encoded}`);
 
@@ -394,6 +441,20 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }, [isFav, showJd])
 
+    const isApplied = (id: string): boolean => {
+
+        const x = applications?.find(app => app.post_id == id);
+
+        if (x && ["selected", "pending"].includes(x.status)) {
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
     return (
         <>
             <div className="w-full flex pt-5 flex-col min-w-[400px]">
@@ -403,7 +464,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                     {/* shortlisted student list */}
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                         <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Saved</p>
-                        <div className="w-full h-[75vh]">
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
                             {saved?.length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
@@ -427,7 +488,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 description={post.description}
                                                 createdAt={post.createdAt}
                                                 mark={() => mark(post._id)}
-                                                showJd={() => showJD(post._id)}
+                                                showJd={() => showJD(post._id, isApplied(post._id) ? "rejected" : "")}
 
                                             />
 
@@ -444,7 +505,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                     {/* this company created job post list */}
                     <section className=" sm:w-[80%] sm:min-w-[500px] min-h-[79vh] w-full rounded-lg bg-blue-50">
                         <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Recently Posted</p>
-                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth">
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth scrollbar-hide">
                             {posts?.length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
@@ -472,8 +533,10 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 companyName={post.companyName}
                                                 mark={() => mark(post._id)}
                                                 saved={savedList}
-                                                showJd={() => showJD(post._id)}
-                                                toApply={() => toApply(post._id)}
+                                                showJd={() => showJD(post._id, isApplied(post._id) ? "rejected" : "")}
+                                                toApply={() => toApply(post._id, isApplied(post._id) ? "rejected" : "")}
+                                                isApplied={isApplied(post._id)}
+
                                             />
 
                                         )
@@ -488,10 +551,20 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                     {/* applications list received by students */}
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
-                        <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Sent</p>
+                        <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
+                            <p className="pt-2 text-center text-xl font-mono">Sent</p>
+                            <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer outline-none pr-3 self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
-                        <div className="w-full h-[75vh]">
-                            {applications?.length == 0 ?
+                                <option value="selected">Selected</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="cancelled">Cancelled</option>
+
+                            </select>
+                        </div>
+
+                        <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
+                            {applications?.filter((app) => app.status == filter).length == 0 ?
 
                                 <div className="h-full w-full flex justify-center items-center">
 
@@ -501,13 +574,13 @@ export default function StudentDashboard({ email }: { email: string }) {
                                 :
                                 <div>
 
-                                    {applications?.map((application) => {
+                                    {applications?.filter((app) => app.status == filter).map((application) => {
 
                                         return (
 
                                             <Application
 
-                                                key={application.post_id}
+                                                key={application._id}
                                                 _id={application.post_id}
                                                 role={application.role}
                                                 type={application.type}
@@ -515,7 +588,8 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 createdAt={application.createdAt}
                                                 contact={application.contactNumber}
                                                 period={application.period}
-                                                showJd={() => showJD(application.post_id, "hide")}
+                                                showJd={() => showJD(application.post_id, application.status)}
+                                                cancel={() => cancel(application._id)}
 
                                             />
 
@@ -536,7 +610,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             {showJd &&
                 <Modal show={showJd} setShow={closeSubmission}>
-                    <div className="py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center">
+                    <div className={`py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center scrollbar-thin scrollbar-hide`}>
                         <div className="w-full h-[85vh]">
                             {jd?.endsWith('.jpg') &&
                                 <div className="flex justify-center items-center w-full">
