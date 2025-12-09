@@ -19,6 +19,7 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [show, setShow] = useState(false);
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
@@ -36,7 +37,7 @@ export default function LoginPage() {
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
-
+        setLoading(true);
         try {
 
             if (email.length !== 0 && password.length !== 0) {
@@ -74,7 +75,7 @@ export default function LoginPage() {
 
                 localStorage.setItem("token", res.data.token);
 
-                router.push('/student/dashboard');
+                router.replace('/student/dashboard');
 
             } else {
 
@@ -86,6 +87,7 @@ export default function LoginPage() {
 
             console.log('Error from login : ' + err);
             setError('Failed to login');
+            setLoading(false);
 
         }
     }
@@ -118,7 +120,7 @@ export default function LoginPage() {
                             <span className={` text-red-400 text-sm italic ${!(error || message) ? 'opacity-0' : 'opacity-100'}`}>{error ? error : message}</span>
                         </div>
                     </div>
-                    <input type="submit" value='Sign In' className="outline-none bg-green-500 text-white w-full py-1 mt-1 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+                    <input type="submit" disabled={loading} value={loading ? 'Signing in...' : 'Sign In'} className="outline-none bg-green-500 text-white w-full py-1 mt-1 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
                     <p className="py-4">Do not have account? <Link href='/signup' className="text-blue-500">Sign Up</Link></p>
                 </form>
             </div>

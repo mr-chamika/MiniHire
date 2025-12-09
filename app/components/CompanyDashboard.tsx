@@ -240,7 +240,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 {/* this company created job post list */}
                 <section className="sm:w-[80%] min-h-[79vh] w-full rounded-lg bg-blue-50">
                     <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">My Posts</p>
-                    <div className="overflow-y-auto scroll-smooth w-full h-[70vh]">
+                    <div className="overflow-y-auto scroll-smooth w-full h-[70vh] scrollbar-hide">
                         {myPosts?.length == 0 ?
 
                             <div className="h-full w-full flex justify-center items-center">
