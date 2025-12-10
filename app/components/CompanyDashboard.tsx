@@ -5,6 +5,9 @@ import Modal from "./Modal";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Post_Company from "./Post_Company";
+import Application_Company from "./Application_Company"
+import Image from "next/image";
+
 interface Token {
 
     userId: string;
@@ -31,6 +34,44 @@ interface Post {
     country: string;
     createdAt: string;
     updatedAt: string;
+}
+
+interface Application {
+
+    //details of post
+    role: string;
+    period: string;
+    type: string;
+
+    //details of application
+    firstName: string;
+    lastName: string;
+    email: string;
+    university: string;
+    resume: string;
+    portfolio: string;
+    linkedin: string;
+    post_id: string;
+    _id: string;
+    degree: string;
+    createdAt: string;
+    status: string;
+
+}
+
+interface Form {
+
+    _id: string;
+    firstName: string;
+    lastName: string;
+    university: string;
+    degree: string;
+    portfolio: string;
+    linkedin: string;
+    resume: string;
+    post_id: string;
+    jd: string;
+
 }
 
 export default function CompanyDashboard({ email }: { email: string }) {
@@ -72,11 +113,34 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [role, setRole] = useState(roles[0].value);
     const [type, setType] = useState(types[0].value);
     const [period, setPeriod] = useState(periods[0].value);
-    const [jd, setJd] = useState<File | null>(null);
+    const [jd, setJd] = useState<File | null>(null);//input of job description when create a job post by company
+    const [jdCompany, setJdCompany] = useState('');
     const [vacancies, setVacancies] = useState(1);
     const [desc, setDesc] = useState('');
+    const [filter, setFilter] = useState("pending");
+    const [showJd, setShowJd] = useState(false);
+    const [hide, setHide] = useState(false);
+
+
+    const [load, setLoad] = useState(false);
 
     const [myPosts, setMyPosts] = useState<Post[] | null>(null)
+    const [applications, setApplications] = useState<Application[] | null>(null)
+
+    const [data, setData] = useState<Form>(
+        {
+            _id: '',
+            firstName: '',
+            lastName: '',
+            university: '',
+            degree: '',
+            portfolio: '',
+            linkedin: '',
+            resume: '',
+            post_id: '',
+            jd: ''
+        }
+    );
 
     useEffect(() => {
 
@@ -152,10 +216,48 @@ export default function CompanyDashboard({ email }: { email: string }) {
             }
         }
 
+        const getApplications = async () => {//to get applications sent by users to this company
+
+            const encoded = encodeURIComponent(email);
+
+            try {
+
+                const res = await axios.get(`/api/applications?toCompany=${encoded}`);
+
+                if (res.status != 200) {
+
+                    alert('No applications sent');
+                    return;
+
+                }
+
+                const data = res.data;
+                console.log(data)
+                if (!data) {
+
+                    alert('Check connection issues');
+                    setApplications([]);
+                    return;
+
+                }
+
+                setApplications(data);
+
+            } catch (err) {
+
+                alert("Error fetching posts: " + err);
+                setApplications([]);
+
+            }
+
+        }
+
+
         getNameAndContact();
         getMyPosts();
+        getApplications();
 
-    }, [modal])
+    }, [modal, load])
 
     const handleSubmit = async (e: any) => {
 
@@ -189,7 +291,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
             if (res.status != 200) {
 
-                alert('Job post creation faild.');
+                alert('Check your internet connection');
                 return;
 
             }
@@ -215,6 +317,107 @@ export default function CompanyDashboard({ email }: { email: string }) {
             alert('Creating Job Post Failed.');
 
         }
+    }
+
+    const close = async () => {
+
+        setShowJd(false);
+        setHide(false);
+
+    }
+
+    const review = async (x: string) => {
+
+        try {
+
+            const encoded = encodeURIComponent(x);
+
+            const formData = new FormData();
+
+            formData.append("id", data._id);
+            formData.append("review", encoded);
+
+            try {
+
+                const res = await axios.put('/api/applications', formData);
+
+                if (res.status != 200) {
+
+                    alert('Check your connection');
+                    return;
+
+                }
+
+                if (res.data.message) {
+
+                    alert(res.data.message);
+                    return;
+
+                }
+
+                if (res.data.done == 'true') {
+
+                    alert('Application Reviewed sucessfully.');
+                    close();
+                    setLoad(!load);
+
+                }
+
+            } catch (err) {
+
+                alert("Failed to cancel sent application...");
+                close();
+                return;
+
+            }
+
+        } catch (err) {
+
+            alert('Reviewing Application failed');
+            close();
+
+        }
+
+    }
+
+    const showJD = async (id: string) => {//to show the job description after click on the student post Card
+
+        try {
+
+            const encoded = encodeURIComponent(id);
+
+            const res = await axios.get(`/api/applications?id=${encoded}`);
+
+            if (res.status != 200) {
+
+                alert('Check your internet connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            if (!res.data.jd) {
+
+                alert('No Job description added');
+                return;
+
+            }
+
+            setJdCompany(res.data.jd);
+            setData({ ...res.data._doc, jd: res.data.jd })
+            setShowJd(true);
+
+        } catch (err) {
+
+            alert("Error showing job description: " + err);
+            return;
+
+        }
 
     }
 
@@ -238,9 +441,9 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 </section>
 
                 {/* this company created job post list */}
-                <section className="sm:w-[80%] min-h-[79vh] w-full rounded-lg bg-blue-50">
-                    <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">My Posts</p>
-                    <div className="overflow-y-auto scroll-smooth w-full h-[70vh] scrollbar-hide">
+                <section className="sm:w-[80%] min-h-[78vh] w-full rounded-lg bg-blue-50">
+                    <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">My Posts {myPosts && myPosts.length > 0 ? '(' + myPosts?.length + ')' : ''}</p>
+                    <div className="overflow-y-auto scroll-smooth w-full h-[73vh] scrollbar-hide">
                         {myPosts?.length == 0 ?
 
                             <div className="h-full w-full flex justify-center items-center">
@@ -281,8 +484,59 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 </section>
 
                 {/* applications list received by students */}
-                <section className="sm:w-[25%] w-full bg-yellow-50">
-                    <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Applications</p>
+                <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
+                    <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
+                        <p className="pt-2 text-center text-xl font-mono">Sent {applications && applications.length > 0 ? '(' + applications?.length + ')' : ''}</p>
+                        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+
+                            <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option>
+                            <option value="pending">Pending {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'pending').length + ')' : ''}</option>
+                            <option value="rejected">Rejected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'rejected').length + ')' : ''}</option>
+                            <option value="cancelled">Cancelled {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'cancelled').length + ')' : ''}</option>
+
+                        </select>
+                    </div>
+
+                    <div className="w-full h-[73vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
+                        {applications?.filter((app) => app.status == filter).length == 0 ?
+
+                            <div className="h-full w-full flex justify-center items-center">
+
+                                <p className="opacity-50">No Applications Yet</p>
+
+                            </div>
+                            :
+                            <div>
+
+                                {applications?.filter((app) => app.status == filter).map((application) => {
+
+                                    return (
+
+                                        <Application_Company
+
+                                            key={application._id}
+                                            _id={application._id}
+                                            role={application.role}
+                                            type={application.type}
+                                            status={application.status}
+                                            createdAt={application.createdAt}
+                                            showJd={() => showJD(application._id)}
+                                            firstName={application.firstName}
+                                            degree={application.degree}
+                                            cancel={() => review("cancelled")}
+                                            lastName={application.lastName}
+
+                                        />
+
+                                    )
+
+                                })}
+
+                            </div>
+
+                        }
+                    </div>
+
                 </section>
 
             </div>
@@ -381,6 +635,35 @@ export default function CompanyDashboard({ email }: { email: string }) {
                     </div>
                 </Modal>
 
+            }
+
+            {showJd &&
+                <Modal show={showJd} setShow={close}>
+                    <div className={`py-2 scroll-smooth overflow-y-auto max-h-[86vh] flex flex-row items-center scrollbar-hide`}>
+                        <div className="w-full h-[85vh]">
+                            {jdCompany?.endsWith('.jpg') &&
+                                <div className="flex justify-center items-center w-full">
+                                    <div className="flex items-center justify-center w-[80%] h-full">
+                                        <Image src={jdCompany} alt="Your Logo" height={600} width={600} />
+                                    </div>
+                                </div>}
+                        </div>
+
+                        <div className="w-full flex flex-col h-[85vh]">
+
+                            <iframe
+                                src={`${data?.resume}`}
+                                className=" w-[95%] h-[41vh] sm:h-[81vh]"
+                                title="Hasith Wijesinghe CV"
+                            />
+                        </div>
+
+                    </div>
+                    <div className="w-full justify-center flex gap-10 ">
+                        <div onClick={() => review("selected")} className="w-[50%] sm:w-[38%] py-2  flex justify-center items-center text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">Accept</div>
+                        <div onClick={() => review("rejected")} className="w-[50%] sm:w-[38%] py-2  flex justify-center items-center text-lg font-bold bg-red-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-red-300 hover:bg-transparent shadow-black">Reject</div>
+                    </div>
+                </Modal>
             }
 
         </div>

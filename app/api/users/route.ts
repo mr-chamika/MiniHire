@@ -292,7 +292,7 @@ export async function GET(req: Request) {
 
         if (!student) {
 
-            return;
+            return Response.json({ message: "No such student registered..." });
 
         }
 

@@ -1,5 +1,6 @@
 import { Database } from "@/db";
 import { Application } from "@/models/Application";
+import { Company } from "@/models/Company";
 import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
 import { URL } from "url";
@@ -79,6 +80,8 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const fo = searchParams.get("fo");
+    const email = searchParams.get("toCompany");
+    const id = searchParams.get("id");
 
     if (fo) {
 
@@ -114,6 +117,81 @@ export async function GET(req: Request) {
 
         return Response.json(toReturn);
 
+    } else if (email) {
+
+        const comapny = await Company.findOne({ email: email }, "name");
+
+        if (!comapny) {
+
+            return Response.json([]);
+
+        }
+
+        const posts = await Post.find({ companyName: comapny.name }).distinct("_id");
+
+        if (!posts) {
+
+            return Response.json([]);
+
+        }
+
+
+        const applications = await Application.find({ post_id: { $in: posts } });
+
+        if (!applications) {
+
+            return Response.json([]);
+
+        }
+
+        let toReturn = [];
+
+        for (const app of applications) {
+
+            let post = await Post.findOne({ _id: app.post_id }, "role contactNumber jd period type");
+
+            toReturn.push({
+
+                period: post.period,
+                role: post.role,
+                type: post.type,
+                firstName: app.firstName,
+                lastName: app.lastName,
+                email: app.email,
+                university: app.university,
+                resume: app.resume,
+                portfolio: app.portfolio,
+                linkedin: app.linkedin,
+                _id: app._id,
+                degree: app.degree,
+                createdAt: app.createdAt,
+                status: app.status,
+                post_id: app.post_id
+
+            })
+
+        }
+
+        return Response.json(toReturn);
+
+    } else if (id) {
+
+        let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
+
+        if (!application) {
+
+            return Response.json({ message: "This application no longer exists." });
+
+        }
+
+        const post = await Post.findOne({ _id: application.post_id });
+
+        const returnObj = { ...application, jd: post.jd }
+
+        console.log(returnObj)
+
+        return Response.json(returnObj);
+
     }
 
 }
@@ -137,23 +215,12 @@ export async function PUT(req: Request) {
 
     const id = formData.get("id");
     const operation = formData.get("operation");
-
-    const application = await Application.findOne({ _id: id });
-
-    if (!operation) {
-
-        return Response.json({ message: 'Invalid operation...' });
-
-    }
-
-    if (!application) {
-
-        return Response.json({ message: 'Invalid application...' });
-
-    }
+    const review = formData.get("review");
 
 
     if (operation == "cancel") {
+
+        const application = await Application.findOne({ _id: id });
 
         if (application.status == 'selected') {//cv s that rejected by comapny or cancel by student after selected can not be reapply.
 
@@ -175,7 +242,25 @@ export async function PUT(req: Request) {
 
         return Response.json({ done: 'true' });
 
+    } else if (review) {
+
+        console.log(review)
+
+        const application = await Application.findOne({ _id: id });
+
+        if (!application) {
+
+            return Response.json({ message: 'No such application exists...' })
+
+        }
+
+        application.status = review;
+
+        application.save();
+
+        return Response.json({ done: 'true' });
     }
+
     return Response.json({ done: 'false' });
 
 }
