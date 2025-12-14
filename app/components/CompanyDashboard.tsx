@@ -58,6 +58,7 @@ interface Application {
     createdAt: string;
     status: string;
     marks: number;
+    contactNumber: string
 
 }
 
@@ -642,7 +643,8 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
                 alert('email sent');
                 setShowInvite(false)
-
+                setInviteDate(getMinDate)
+                setInviteTime(getMinTimeForDate())
             }
 
         } catch (err) {
@@ -712,6 +714,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
                                             linkedin={application.linkedin}
                                             portfolio={application.portfolio}
                                             setShowInvite={() => getInviteData(application._id)}
+                                            contact={application.contactNumber}
 
                                         />
 
@@ -977,7 +980,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
                     <div className="h-screen">
                         <div className={`scroll-smooth overflow-y-auto max-h-screen flex flex-col w-full sm:gap-0 gap-5 sm:flex-row items-center justify-around`}>
                             <div className="w-[60%] sm:w-[40%]">
-                                {jdCompany?.endsWith('.jpg') &&
+                                {(jdCompany?.endsWith('.jpg') || jdCompany?.endsWith('.jpeg')) &&
                                     <div className="flex w-full justify-center h-full">
                                         <div className="flex h-full">
                                             <Image src={jdCompany} alt="Your Logo" height={600} width={600} className="h-[41vh] sm:h-[80vh]" />

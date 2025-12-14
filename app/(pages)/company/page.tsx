@@ -178,10 +178,10 @@ export default function CompanySignup() {
                     if (res.status != 200) {
 
                         console.log('Error from sending otp: ' + data.message);
-                        return;
 
                     }
                     console.log('From Server : ' + data.message);
+
 
                 }
 
@@ -236,7 +236,7 @@ export default function CompanySignup() {
                             <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">Contact Number</label>
-                                <input required inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="0786715765" value={contact} onChange={(e) => setContact(e.target.value.replace(/[^0-9]/g, ''))} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                <input required inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="07xxxxxxxx" value={contact} onChange={(e) => setContact(e.target.value.replace(/[^0-9]/g, ''))} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
                             </div>
                             <div className="w-full flex flex-col">
@@ -330,6 +330,7 @@ export default function CompanySignup() {
                             className="bg-white p-6 rounded-xl shadow-md w-80 text-center"
                         >
                             <h2 className="text-xl font-semibold mb-4">Enter OTP</h2>
+                            <p>Sent to {email}</p>
 
                             <div className="flex justify-between mb-4">
                                 {otp.map((digit, index) => (

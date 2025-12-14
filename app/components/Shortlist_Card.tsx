@@ -4,8 +4,9 @@ import Degree from '../../public/assets/degree.png';
 import Star from '../../public/assets/stars.png';
 import Linkedin from '../../public/assets/linkedins.png';
 import Global from '../../public/assets/global.png';
+import Contact from '../../public/assets/contact.png';
 
-export default function Shortlist_Card({ _id, marks, status, createdAt, firstName, degree, lastName, university, linkedin, portfolio, setShowInvite }: { _id: string, marks: number, status: string, createdAt: string, showJd: () => void, firstName: string, lastName: string, degree: string, university: string, linkedin: string, portfolio: string, setShowInvite: () => void }) {
+export default function Shortlist_Card({ _id, marks, status, createdAt, firstName, degree, lastName, university, linkedin, portfolio, setShowInvite, contact }: { _id: string, marks: number, status: string, createdAt: string, showJd: () => void, firstName: string, lastName: string, degree: string, university: string, linkedin: string, portfolio: string, setShowInvite: () => void, contact: string }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -50,10 +51,15 @@ export default function Shortlist_Card({ _id, marks, status, createdAt, firstNam
                     <p className="font-bold flex items-center">{marks}/10</p>
                 </div>
 
+                <div className="flex flex-col items-center mb-3 sm:mb-0 sm:flex-row gap-1 h-4">
+                    <Image src={Contact} alt="company name" width={16} />
+                    <p className="font-bold flex items-center">{contact}</p>
+                </div>
+
             </div>
 
             <div className="w-full flex flex-row justify-between items-center mt-1">
-                <div className='flex flex-row sm:gap-1 gap-0 justify-between sm:justify-normal w-[90%] text-sm sm:text-[15px]'>
+                <div className='flex flex-row sm:gap-1 gap-0 justify-between sm:justify-normal w-[80%] text-sm sm:text-[15px]'>
 
                     {/* <button onClick={showJd} className="w-[60%] bg-green-400 rounded-lg mr-3 text-white pb-[2px] hover:border-b-green-600 hover:border">{["cancelled", "rejected"].includes(status) ? 'View' : 'Interview Mail'}</button> */}
                     <button onClick={setShowInvite} className="w-[60%] bg-green-400 rounded-lg mr-3 text-white pb-[2px] hover:border-b-green-600 hover:border">{["cancelled", "rejected"].includes(status) ? 'View' : 'Interview Mail'}</button>

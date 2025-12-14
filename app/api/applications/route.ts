@@ -18,11 +18,13 @@ export async function POST(req: Request) {
         const degree = formData.get("degree");
         const portfolio = formData.get("portfolio");
         const linkedin = formData.get("linkedin");
+        const github = formData.get("github");
         const resume = formData.get("resume");
         const post_id = formData.get("post_id");
         const email = formData.get("email");
+        const contactNumber = formData.get("contactNumber");
 
-        if (!firstName || !lastName || !university || !degree || !portfolio || !linkedin || !resume || !post_id || !email) {
+        if (!firstName || !lastName || !contactNumber || !github || !university || !degree || !portfolio || !linkedin || !resume || !post_id || !email) {
 
             return Response.json({ message: 'Missing some data to save...' });
 
@@ -57,8 +59,10 @@ export async function POST(req: Request) {
             degree,
             portfolio,
             linkedin,
+            github,
             resume,
-            post_id
+            post_id,
+            contactNumber,
 
         })
 
@@ -247,7 +251,9 @@ export async function GET(req: Request) {
                 createdAt: app.createdAt,
                 status: app.status,
                 post_id: app.post_id,
-                marks: app.marks
+                marks: app.marks,
+                contactNumber: app.contactNumber,
+                github: app.github
 
             })
 

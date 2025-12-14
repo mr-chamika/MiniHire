@@ -20,16 +20,18 @@ export async function POST(req: Request) {
 
 
             const email = formData.get("email") as string;
+            const contactNumber = formData.get("contactNumber");
             const firstName = formData.get("firstName");
             const lastName = formData.get("lastName");
             const role = formData.get("role");
             const linkedin = formData.get("linkedin");
             const portfolio = formData.get("portfolio");
+            const github = formData.get("github");
             const resume = formData.get("resume") as File;
             const password = formData.get("password");
             const degree = formData.get("degree");
             const university = formData.get("university");
-            if (!email || !firstName || !lastName || !linkedin || !portfolio || !resume || !password || !degree || !university) {
+            if (!email || !firstName || !lastName || !linkedin || !contactNumber || !portfolio || !github || !resume || !password || !degree || !university) {
 
                 return Response.json({ error: 'All fields are required' });
 
@@ -37,11 +39,18 @@ export async function POST(req: Request) {
 
             const isExists = await Student.findOne({ email: email.toLowerCase() });
 
+            const taken = await Company.findOne({ email: email.toLocaleLowerCase() })//check whether email registered as a student
+
             if (isExists && !isExists.verified) {
 
                 await Student.deleteOne({ email: email.toLowerCase() })
 
+            } else if (taken || isExists) {
+
+                return Response.json({ error: 'This email registered already' });
+
             }
+
 
             const otp = generateOTP();
 
@@ -55,11 +64,13 @@ export async function POST(req: Request) {
             const newStudent = await Student.create({
 
                 email,
+                contactNumber,
                 firstName,
                 lastName,
                 role,
                 linkedin,
                 portfolio,
+                github,
                 resume: blob.url,
                 password: hashedPassword,
                 degree,
@@ -74,7 +85,7 @@ export async function POST(req: Request) {
 
                 if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
 
-                    return Response.json({ message: 'Invalid emailjs credentials' });
+                    return Response.json({ error: 'Invalid emailjs credentials' });
 
                 }
 
@@ -117,11 +128,18 @@ export async function POST(req: Request) {
 
             const isExists = await Company.findOne({ email: email.toLowerCase() });
 
+            const taken = await Student.findOne({ email: email.toLocaleLowerCase() })//check whether email registered as a student
+
             if (isExists && !isExists.verified) {
 
                 await Company.deleteOne({ email: email.toLowerCase() })
 
+            } else if (taken || isExists) {
+
+                return Response.json({ error: 'This email registered already' });
+
             }
+
 
             const otp = generateOTP();
 
@@ -131,7 +149,7 @@ export async function POST(req: Request) {
 
             if (!blob) {
 
-                return Response.json({ message: 'Check your internet connection' });
+                return Response.json({ error: 'Check your internet connection' });
 
             }
 
@@ -158,7 +176,7 @@ export async function POST(req: Request) {
 
                 if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
 
-                    return Response.json({ message: 'Invalid emailjs credentials' });
+                    return Response.json({ error: 'Invalid emailjs credentials' });
 
                 }
 
@@ -288,7 +306,7 @@ export async function GET(req: Request) {
 
     } else if (email_toApply) {
 
-        const student = await Student.findOne({ email: email_toApply }, "firstName lastName university degree portfolio linkedin resume");
+        const student = await Student.findOne({ email: email_toApply }, "firstName lastName university degree portfolio linkedin resume github contactNumber");
 
         if (!student) {
 

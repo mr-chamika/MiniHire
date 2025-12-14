@@ -40,6 +40,8 @@ interface Form {
     linkedin: string;
     resume: string;
     post_id: string;
+    contactNumber: string;
+    github: string;
 
 }
 interface Application {
@@ -83,7 +85,9 @@ export default function StudentDashboard({ email }: { email: string }) {
             portfolio: '',
             linkedin: '',
             resume: '',
-            post_id: ''
+            post_id: '',
+            contactNumber: '',
+            github: ''
         }
     );
 
@@ -152,9 +156,11 @@ export default function StudentDashboard({ email }: { email: string }) {
         formData.append("degree", data.degree);
         formData.append("portfolio", data.portfolio);
         formData.append("linkedin", data.linkedin);
+        formData.append("github", data.github);
         formData.append("resume", data.resume);
         formData.append("post_id", data.post_id);
         formData.append("email", email);
+        formData.append("contactNumber", data.contactNumber);
 
         const res = await axios.post('/api/applications', formData);
 
@@ -612,10 +618,10 @@ export default function StudentDashboard({ email }: { email: string }) {
                 <Modal show={showJd} setShow={closeSubmission}>
                     <div className={`py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center scrollbar-thin scrollbar-hide`}>
                         <div className="w-full h-[85vh]">
-                            {jd?.endsWith('.jpg') &&
+                            {(jd?.endsWith('.jpg') || jd?.endsWith('.jpeg')) &&
                                 <div className="flex justify-center items-center w-full">
                                     <div className="flex items-center justify-center w-[80%] h-[80%]">
-                                        <Image src={jd} alt="Your Logo" height={600} width={600} />
+                                        <Image src={jd} alt="Your Logo" width={440} height={100} />
                                     </div>
                                 </div>}
                         </div>

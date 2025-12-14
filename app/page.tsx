@@ -28,7 +28,7 @@ export default function Home() {
 
       }
 
-      router.push('/student/dashboard');
+      router.push('/dashboard');
       return;
 
     } else {//if token expired navigate to landing page
