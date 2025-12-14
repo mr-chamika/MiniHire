@@ -1,8 +1,9 @@
-import mongoose, { models, ObjectId, Schema } from "mongoose";
+import mongoose, { models, Schema } from "mongoose";
 
 const ApplicationSchema = new Schema({
 
     firstName: { type: String, required: true },
+    marks: Number,
     lastName: { type: String, required: true },
     email: { type: String, required: true },
     university: { type: String, required: true },

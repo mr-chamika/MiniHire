@@ -6,6 +6,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Post_Company from "./Post_Company";
 import Application_Company from "./Application_Company"
+import Shortlist_Card from "./Shortlist_Card"
 import Image from "next/image";
 
 interface Token {
@@ -56,6 +57,7 @@ interface Application {
     degree: string;
     createdAt: string;
     status: string;
+    marks: number;
 
 }
 
@@ -71,6 +73,9 @@ interface Form {
     resume: string;
     post_id: string;
     jd: string;
+    status: string;
+    marks: Number;
+    email: string;
 
 }
 
@@ -118,14 +123,82 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [vacancies, setVacancies] = useState(1);
     const [desc, setDesc] = useState('');
     const [filter, setFilter] = useState("pending");
+    const [filter2, setFilter2] = useState("SE");
     const [showJd, setShowJd] = useState(false);
     const [hide, setHide] = useState(false);
+    const [marks, setMarks] = useState(0);
+    const [showInvite, setShowInvite] = useState(false);//to display pop up to customize interview invitation email.
 
+    //set states for invitation email to student
+
+    const inviteTemplate = `
+Thank you for your interest in the Intern position at our company. We were impressed by your background and would like to invite you to attend a virtual interview.
+
+The interview details, including the scheduled time and meeting link, are provided below.
+
+Please feel free to reach out if you have any questions prior to the interview. We look forward to speaking with you.`
+
+    const minDate = () => {
+
+        const today = new Date();
+
+        const yr = today.getFullYear();
+        const month = today.getMonth() > 9 ? (today.getMonth() + 1).toString() : '0' + (today.getMonth() + 1).toString();
+        const day = today.getDate() > 9 ? (today.getDate()).toString() : '0' + (today.getDate()).toString();
+
+        console.log(`${yr}-${month}-${day}`)
+
+        return `${yr}-${month}-${day}`;
+
+    }
+
+    const getCurrentTime = () => {
+
+        const now = new Date();
+
+
+        const hours = String(now.getHours()).padStart(2, '0');
+
+
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+
+        return `${hours}:${minutes}`;
+    };
+
+    const getMinTimeForDate = () => {
+
+        const today = new Date();
+        const selected = new Date(inviteDate);
+
+        if (
+            today.getFullYear() === selected.getFullYear() &&
+            today.getMonth() === selected.getMonth() &&
+            today.getDate() === selected.getDate()
+        ) {
+
+            const now = new Date();
+            now.setSeconds(0, 0);
+            now.setMinutes(now.getMinutes() + 1);
+            return now.toTimeString().slice(0, 5);
+        }
+
+        return "00:00";
+    };
+
+    const getMinDate = minDate();
+    const MinTime = getCurrentTime();
+
+    const [inviteDate, setInviteDate] = useState(getMinDate)
+    const [inviteTime, setInviteTime] = useState(MinTime)
+    const [invite, setInvite] = useState(inviteTemplate)
+    const [inviteLink, setInviteLink] = useState('https://meet.google.com/landing?hs=197&authuser=0')
 
     const [load, setLoad] = useState(false);
 
     const [myPosts, setMyPosts] = useState<Post[] | null>(null)
     const [applications, setApplications] = useState<Application[] | null>(null)
+    const [shortlist, setShortList] = useState<Application[] | null>(null)
 
     const [data, setData] = useState<Form>(
         {
@@ -138,7 +211,10 @@ export default function CompanyDashboard({ email }: { email: string }) {
             linkedin: '',
             resume: '',
             post_id: '',
-            jd: ''
+            jd: '',
+            status: '',
+            marks: 0,
+            email: ''
         }
     );
 
@@ -232,7 +308,6 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 }
 
                 const data = res.data;
-                console.log(data)
                 if (!data) {
 
                     alert('Check connection issues');
@@ -252,10 +327,47 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
         }
 
+        const getShortlisted = async () => {//to get applications selected by this company
+
+            const encoded = encodeURIComponent(email);
+
+            try {
+
+                const res = await axios.get(`/api/applications?selectedTo=${encoded}`);
+
+                if (res.status != 200) {
+
+                    alert('No applications selected');
+                    return;
+
+                }
+
+                const data = res.data;
+                if (!data) {
+
+                    alert('Check connection issues');
+                    setShortList([]);
+                    return;
+
+                }
+
+                setShortList(data);
+                console.log(data)
+
+            } catch (err) {
+
+                alert("Error fetching posts: " + err);
+                setShortList([]);
+
+            }
+
+        }
+
 
         getNameAndContact();
         getMyPosts();
         getApplications();
+        getShortlisted();
 
     }, [modal, load])
 
@@ -323,6 +435,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
         setShowJd(false);
         setHide(false);
+        setMarks(0)
 
     }
 
@@ -337,50 +450,90 @@ export default function CompanyDashboard({ email }: { email: string }) {
             formData.append("id", data._id);
             formData.append("review", encoded);
 
-            try {
+            const res = await axios.put('/api/applications', formData);
 
-                const res = await axios.put('/api/applications', formData);
+            if (res.status != 200) {
 
-                if (res.status != 200) {
-
-                    alert('Check your connection');
-                    return;
-
-                }
-
-                if (res.data.message) {
-
-                    alert(res.data.message);
-                    return;
-
-                }
-
-                if (res.data.done == 'true') {
-
-                    alert('Application Reviewed sucessfully.');
-                    close();
-                    setLoad(!load);
-
-                }
-
-            } catch (err) {
-
-                alert("Failed to cancel sent application...");
-                close();
+                alert('Check your connection');
                 return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+                return;
+
+            }
+
+            if (res.data.done == 'true') {
+
+                if (data.marks != marks) {
+
+                    marking();
+
+                }
+
+                alert('Application Reviewed sucessfully.');
+                close();
+                setLoad(!load);
 
             }
 
         } catch (err) {
 
-            alert('Reviewing Application failed');
+            alert("Failed to cancel sent application...");
             close();
+            return;
 
         }
 
     }
 
-    const showJD = async (id: string) => {//to show the job description after click on the student post Card
+    const marking = async () => {
+
+        try {
+
+            const formData = new FormData();
+
+            formData.append("id", data._id);
+            formData.append("marks", marks.toString());
+
+            const res = await axios.put('/api/applications', formData);
+
+            if (res.status != 200) {
+
+                alert('Check your connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+                return;
+
+            }
+
+            if (res.data.done == 'true') {
+
+                alert('Application marked sucessfully.');
+
+            }
+
+        } catch (err) {
+
+            alert("Failed to mark application...");
+            close();
+            return;
+
+        }
+    }
+
+    const showJD = async (id: string, x = '') => {//to show the job description after click on the student post Card
+
+        if (["cancelled"].includes(x)) { setHide(true); }
+        if (["rejected"].includes(x)) { setHide(true); }
 
         try {
 
@@ -411,7 +564,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
             setJdCompany(res.data.jd);
             setData({ ...res.data._doc, jd: res.data.jd })
             setShowJd(true);
-
+            setMarks(res.data._doc.marks)
         } catch (err) {
 
             alert("Error showing job description: " + err);
@@ -421,6 +574,86 @@ export default function CompanyDashboard({ email }: { email: string }) {
 
     }
 
+    const getInviteData = async (id: string) => {
+
+        try {
+
+            const encoded = encodeURIComponent(id);
+
+            const res = await axios.get(`/api/applications?id=${encoded}`);
+
+            if (res.status != 200) {
+
+                alert('Check your internet connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            setData({ ...res.data._doc, jd: res.data.jd })
+            setShowInvite(true);
+
+        } catch (err) {
+
+            alert("Error showing job description: " + err);
+            return;
+
+        }
+
+
+    }
+
+    const handleSubmitEmail = async (e: any) => {
+
+        e.preventDefault();
+
+        try {
+
+            const formData = new FormData();
+
+            formData.append("date", inviteDate);
+            formData.append("time", inviteTime);
+            formData.append("name", data.firstName + " " + data.lastName);
+            formData.append("email", data.email);
+            formData.append("link", inviteLink);
+            formData.append("invite", invite)
+
+            const res = await axios.post('/api/applications', formData)
+
+            if (res.status != 200) {
+
+                alert('Check your internet connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            if (res.data.done == 'true') {
+
+                alert('email sent');
+                setShowInvite(false)
+
+            }
+
+        } catch (err) {
+
+            alert("Error sending email: " + err);
+            return;
+
+        }
+
+
+    }
 
     return (
 
@@ -436,12 +669,64 @@ export default function CompanyDashboard({ email }: { email: string }) {
             <div className="flex flex-col sm:flex-row justify-between gap-2 px-2 min-w-[400px]">
 
                 {/* shortlisted student list */}
-                <section className="sm:w-[25%] w-full bg-yellow-50">
-                    <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Shortlist</p>
+                <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
+                    <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
+                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => app.status == "selected").length + ')' : ''}</p>
+                        <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+
+                            {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
+                            <option value="SE">SE {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['SE'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
+                            <option value="QA">QA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['QA'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
+                            <option value="BA">BA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['BA'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
+
+                        </select>
+                    </div>
+
+                    <div className="w-full h-[73vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
+                        {shortlist?.filter((app) => [filter2].includes(app.degree.split(" ")[0])).length == 0 ?
+
+                            <div className="h-full w-full flex justify-center items-center">
+
+                                <p className="opacity-50">No Shortlisted applications</p>
+
+                            </div>
+                            :
+                            <div>
+
+                                {shortlist?.filter((app) => [filter2].includes(app.degree.split(" ")[0])).map((application) => {
+
+                                    return (
+
+                                        <Shortlist_Card
+
+                                            key={application._id}
+                                            _id={application._id}
+                                            status={application.status}
+                                            createdAt={application.createdAt}
+                                            showJd={() => showJD(application._id, application.status)}
+                                            firstName={application.firstName}
+                                            degree={application.degree}
+                                            lastName={application.lastName}
+                                            university={application.university}
+                                            marks={application.marks}
+                                            linkedin={application.linkedin}
+                                            portfolio={application.portfolio}
+                                            setShowInvite={() => getInviteData(application._id)}
+
+                                        />
+
+                                    )
+
+                                })}
+
+                            </div>
+
+                        }
+                    </div>
                 </section>
 
                 {/* this company created job post list */}
-                <section className="sm:w-[80%] min-h-[78vh] w-full rounded-lg bg-blue-50">
+                <section className="sm:w-[80%] sm:min-w-[500px] min-h-[78vh] w-full rounded-lg bg-blue-50">
                     <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">My Posts {myPosts && myPosts.length > 0 ? '(' + myPosts?.length + ')' : ''}</p>
                     <div className="overflow-y-auto scroll-smooth w-full h-[73vh] scrollbar-hide">
                         {myPosts?.length == 0 ?
@@ -486,10 +771,10 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 {/* applications list received by students */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                     <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Sent {applications && applications.length > 0 ? '(' + applications?.length + ')' : ''}</p>
-                        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.length > 0 ? '(' + applications.filter(app => app.status != "selected").length + ')' : ''}</p>
+                        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
-                            <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option>
+                            {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
                             <option value="pending">Pending {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'pending').length + ')' : ''}</option>
                             <option value="rejected">Rejected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'rejected').length + ')' : ''}</option>
                             <option value="cancelled">Cancelled {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'cancelled').length + ')' : ''}</option>
@@ -520,7 +805,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
                                             type={application.type}
                                             status={application.status}
                                             createdAt={application.createdAt}
-                                            showJd={() => showJD(application._id)}
+                                            showJd={() => showJD(application._id, application.status)}
                                             firstName={application.firstName}
                                             degree={application.degree}
                                             cancel={() => review("cancelled")}
@@ -636,32 +921,104 @@ export default function CompanyDashboard({ email }: { email: string }) {
                 </Modal>
 
             }
+            {showInvite &&
+
+                <Modal show={showInvite} setShow={setShowInvite}>
+                    <div className="justify-center items-center flex h-[90vh]">
+                        <form onSubmit={handleSubmitEmail} className="w-[72%] shadow-xl px-10 py-2 rounded-lg flex flex-col justify-center items-center bg-gray-50 min-w-[380px]">
+                            <div className=" space-y-2 min-w-[145px] w-full">
+                                <div className="flex flex-row gap-5">
+                                    <div className="w-full flex flex-col pb-2">
+
+                                        <label className="text-lg text-gray-500">Date</label>
+                                        <input type="date" min={getMinDate} value={inviteDate} onChange={(e) => setInviteDate(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                    </div>
+                                    <div className="w-full flex flex-col pb-2">
+
+                                        <label className="text-lg text-gray-500">Time</label>
+                                        <input type="time" min={getMinTimeForDate()} value={inviteTime} onChange={(e) => { e.target.value < getMinTimeForDate() ? setInviteTime(getMinTimeForDate()) : setInviteTime(e.target.value) }} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                    </div>
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Candidate's Name</label>
+                                    <input readOnly type="text" value={data.firstName + " " + data.lastName} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Candidate's Email</label>
+                                    <input readOnly inputMode="numeric" value={data.email} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Meeting Link</label>
+                                    <input required type="text" pattern="https://meet.google.com/.*" value={inviteLink} onChange={(e) => setInviteLink(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Invitation</label>
+                                    <textarea rows={10} required value={invite} onChange={(e) => setInvite(e.target.value)} className="outline-none  rounded-lg px-4 py-1 bg-blue-100 border border-blue-200 w-full resize-none text-justify" />
+                                </div>
+                            </div>
+                            <input type="submit" value='Send Email' className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+
+                        </form>
+                    </div>
+                </Modal>
+
+            }
 
             {showJd &&
                 <Modal show={showJd} setShow={close}>
-                    <div className={`py-2 scroll-smooth overflow-y-auto max-h-[86vh] flex flex-row items-center scrollbar-hide`}>
-                        <div className="w-full h-[85vh]">
-                            {jdCompany?.endsWith('.jpg') &&
-                                <div className="flex justify-center items-center w-full">
-                                    <div className="flex items-center justify-center w-[80%] h-full">
-                                        <Image src={jdCompany} alt="Your Logo" height={600} width={600} />
+                    <div className="h-screen">
+                        <div className={`scroll-smooth overflow-y-auto max-h-screen flex flex-col w-full sm:gap-0 gap-5 sm:flex-row items-center justify-around`}>
+                            <div className="w-[60%] sm:w-[40%]">
+                                {jdCompany?.endsWith('.jpg') &&
+                                    <div className="flex w-full justify-center h-full">
+                                        <div className="flex h-full">
+                                            <Image src={jdCompany} alt="Your Logo" height={600} width={600} className="h-[41vh] sm:h-[80vh]" />
+                                        </div>
+                                    </div>}
+                            </div>
+
+                            <div className="flex flex-col items-center w-full sm:w-[50%] mb-1">
+
+                                <iframe
+                                    src={`${data?.resume}`}
+                                    className="w-[60%] sm:w-[85%] h-[41vh] sm:h-[81vh]"
+                                    title="Hasith Wijesinghe CV"
+                                />
+                            </div>
+
+                        </div>
+                        <div className="w-full flex gap-14 sm:gap-6  justify-center sm:justify-normal sm:ml-10 sm:mt-5">
+                            {hide ? (
+
+                                !["cancelled"].includes(data.status) && <div onClick={() => setHide(false)} className="w-[50%] sm:w-[38%] flex justify-center items-center text-lg font-bold bg-yellow-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-yellow-300 hover:bg-transparent shadow-black">Reconsider</div>
+
+                            ) : (
+
+                                <div className="w-full flex flex-row sm:gap-36 justify-evenly sm:justify-normal">
+                                    <div className="flex flex-row sm:w-[40%] w-[50%] gap-3 sm:gap-6 items-center">
+                                        <div onClick={marks > 0 ? () => review("selected") : () => alert('Do not forget to mark')} className="w-[45%] sm:w-[50%] flex justify-center items-center h-9 text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">Accept</div>
+                                        <div onClick={["rejected"].includes(data.status) ? close : () => review("rejected")} className="w-[45%] sm:w-[50%] h-9  flex justify-center items-center text-lg font-bold bg-red-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-red-300 hover:bg-transparent shadow-black">{["rejected"].includes(data.status) ? 'Keep Rejected' : 'Reject'}</div>
                                     </div>
-                                </div>}
+                                    <div className="flex items-center justify-center sm:w-[35%]">
+                                        <div className="py-1 flex items-center justify-center flex-row sm:w-[300px] gap-2 px-2 sm:gap-2 bg-blue-400">
+                                            <label>Marks</label>
+                                            <input type="number" min={0} max={10} value={marks || 0} onBlur={() => { if (marks > 10) setMarks(10); if (marks < 0) setMarks(0); }} onChange={(e) => setMarks(parseInt(e.target.value))} className="px-2 sm:w-44 w-10" />
+                                            <button disabled={marks == data.marks} onClick={marking} className="bg-black text-white px-1 rounded-lg pb-[2px]">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            )
+                            }
                         </div>
-
-                        <div className="w-full flex flex-col h-[85vh]">
-
-                            <iframe
-                                src={`${data?.resume}`}
-                                className=" w-[95%] h-[41vh] sm:h-[81vh]"
-                                title="Hasith Wijesinghe CV"
-                            />
-                        </div>
-
-                    </div>
-                    <div className="w-full justify-center flex gap-10 ">
-                        <div onClick={() => review("selected")} className="w-[50%] sm:w-[38%] py-2  flex justify-center items-center text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">Accept</div>
-                        <div onClick={() => review("rejected")} className="w-[50%] sm:w-[38%] py-2  flex justify-center items-center text-lg font-bold bg-red-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-red-300 hover:bg-transparent shadow-black">Reject</div>
                     </div>
                 </Modal>
             }

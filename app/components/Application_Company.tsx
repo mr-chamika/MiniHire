@@ -13,12 +13,13 @@ export default function Application_Company({ _id, role, type, status, createdAt
 
             <div className="text-sm sm:text-[13px] flex flex-row justify-between pt-2">
 
-                <p>{role == "SE" ? "Software Engineering Intern" : role == "QA" ? "Quality Assuarance Intern" : "N/A"} | {type == "remote" ? "Remote" : type == "hybrid" ? "Hybrid" : "Onsite"}</p>
-                <div className="flex flex-row justify-between">
+                <p>{role == "SE" ? "Software Engineering Intern" : role == "QA" ? "Quality Assuarance Intern" : "N/A"}</p>
+                <p className="bg-blue-300 rounded-lg px-2 pb-[2px] font-semibold">{type == "remote" ? "Remote" : type == "hybrid" ? "Hybrid" : "Onsite"}</p>
+                {/* <div className="flex flex-row justify-between">
 
                     <button className={`px-1 pb-1 font-bold rounded-lg text-white ${status == 'pending' ? 'bg-yellow-400' : status == 'cancelled' ? 'bg-red-400' : status == 'rejected' ? 'bg-black' : 'bg-green-400'}`}>{status}</button>
 
-                </div>
+                </div> */}
 
             </div>
 
@@ -40,7 +41,7 @@ export default function Application_Company({ _id, role, type, status, createdAt
             <div className="w-full flex flex-row justify-between items-center mt-1">
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-[15px]'>
 
-                    {!["cancelled", "rejected"].includes(status) && <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">Review</button>}
+                    <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">{["cancelled", "rejected"].includes(status) ? 'View' : 'Review'}</button>
                     {/* {!["cancelled", "rejected"].includes(status) && <button onClick={cancel} className="w-[50%] bg-red-400 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Reject</button>} */}
 
                 </div>

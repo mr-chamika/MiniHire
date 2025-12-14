@@ -70,6 +70,11 @@ export async function POST(req: Request) {
 
         return Response.json({ done: 'true' });
 
+    } if (formData.has("invite")) {
+
+        console.log(formData);
+
+        return Response.json({ done: 'true' });
     }
 
 }
@@ -82,6 +87,7 @@ export async function GET(req: Request) {
     const fo = searchParams.get("fo");
     const email = searchParams.get("toCompany");
     const id = searchParams.get("id");
+    const selectedTo = searchParams.get("selectedTo");
 
     if (fo) {
 
@@ -166,7 +172,7 @@ export async function GET(req: Request) {
                 degree: app.degree,
                 createdAt: app.createdAt,
                 status: app.status,
-                post_id: app.post_id
+                post_id: app.post_id,
 
             })
 
@@ -176,7 +182,8 @@ export async function GET(req: Request) {
 
     } else if (id) {
 
-        let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
+        //let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
+        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email");
 
         if (!application) {
 
@@ -188,9 +195,65 @@ export async function GET(req: Request) {
 
         const returnObj = { ...application, jd: post.jd }
 
-        console.log(returnObj)
-
         return Response.json(returnObj);
+
+    } else if (selectedTo) {
+
+        const comapny = await Company.findOne({ email: selectedTo }, "name");
+
+        if (!comapny) {
+
+            return Response.json([]);
+
+        }
+
+        const posts = await Post.find({ companyName: comapny.name }).distinct("_id");
+
+        if (!posts) {
+
+            return Response.json([]);
+
+        }
+
+
+        const applications = await Application.find({ status: "selected", post_id: { $in: posts } });
+
+        if (!applications) {
+
+            return Response.json([]);
+
+        }
+
+        let toReturn = [];
+
+        for (const app of applications) {
+
+            let post = await Post.findOne({ _id: app.post_id }, "role contactNumber jd period type");
+
+            toReturn.push({
+
+                period: post.period,
+                role: post.role,
+                type: post.type,
+                firstName: app.firstName,
+                lastName: app.lastName,
+                email: app.email,
+                university: app.university,
+                resume: app.resume,
+                portfolio: app.portfolio,
+                linkedin: app.linkedin,
+                _id: app._id,
+                degree: app.degree,
+                createdAt: app.createdAt,
+                status: app.status,
+                post_id: app.post_id,
+                marks: app.marks
+
+            })
+
+        }
+
+        return Response.json(toReturn);
 
     }
 
@@ -216,6 +279,7 @@ export async function PUT(req: Request) {
     const id = formData.get("id");
     const operation = formData.get("operation");
     const review = formData.get("review");
+    const marks = formData.get("marks");
 
 
     if (operation == "cancel") {
@@ -244,8 +308,6 @@ export async function PUT(req: Request) {
 
     } else if (review) {
 
-        console.log(review)
-
         const application = await Application.findOne({ _id: id });
 
         if (!application) {
@@ -259,6 +321,23 @@ export async function PUT(req: Request) {
         application.save();
 
         return Response.json({ done: 'true' });
+
+    } else if (marks && id) {
+
+        let application = await Application.findOne({ _id: id });
+
+        if (!application) {
+
+            return Response.json({ message: "This application no longer exists." });
+
+        }
+
+        application.marks = marks;
+
+        application.save()
+
+        return Response.json({ done: 'true' });
+
     }
 
     return Response.json({ done: 'false' });

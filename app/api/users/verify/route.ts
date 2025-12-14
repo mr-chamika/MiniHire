@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         return Response.json({ message: 'Signup again' });
 
     }
-    console.log(user)
+
     if (Date.now() > user.expires) {
 
         return Response.json({ message: 'OTP expired' });

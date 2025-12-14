@@ -13,12 +13,13 @@ export default function Application({ _id, role, type, status, createdAt, showJd
 
             <div className="text-sm sm:text-[13px] flex flex-row justify-between pt-2">
 
-                <p>{role == "SE" ? "Software Engineering Intern" : role == "QA" ? "Quality Assuarance Intern" : "N/A"} | {type == "remote" ? "Remote" : type == "hybrid" ? "Hybrid" : "Onsite"}</p>
-                <div className="flex flex-row justify-between">
+                <p>{role == "SE" ? "Software Engineering Intern" : role == "QA" ? "Quality Assuarance Intern" : "N/A"}</p>
+                <p className="bg-blue-300 rounded-lg px-2 pb-[2px] font-semibold">{type == "remote" ? "Remote" : type == "hybrid" ? "Hybrid" : "Onsite"}</p>
+                {/* <div className="flex flex-row justify-between">
 
                     <button className={`px-1 pb-1 font-bold rounded-lg text-white ${status == 'pending' ? 'bg-yellow-400' : status == 'cancelled' ? 'bg-red-400' : status == 'rejected' ? 'bg-black' : 'bg-green-400'}`}>{status}</button>
 
-                </div>
+                </div> */}
 
             </div>
 
