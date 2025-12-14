@@ -75,7 +75,7 @@ export default function LoginPage() {
 
                 localStorage.setItem("token", res.data.token);
 
-                router.replace('/student/dashboard');
+                router.replace('/dashboard');
 
             } else {
 

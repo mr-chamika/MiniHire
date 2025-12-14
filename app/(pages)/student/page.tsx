@@ -193,6 +193,7 @@ export default function StudentSignup() {
                 if (data.error) {
 
                     console.log('Error from server: ' + data.error);
+                    alert(data.error)
                     return;
 
                 }

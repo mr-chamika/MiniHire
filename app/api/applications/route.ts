@@ -4,6 +4,7 @@ import { Company } from "@/models/Company";
 import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
 import { URL } from "url";
+import emaijs from '@emailjs/nodejs'
 
 export async function POST(req: Request) {
 
@@ -74,11 +75,124 @@ export async function POST(req: Request) {
 
         return Response.json({ done: 'true' });
 
-    } if (formData.has("invite")) {
+    } else if (formData.has("invite")) {
 
-        console.log(formData);
+        const _id = formData.get("_id");
+        const date = formData.get("date");
+        const time = formData.get("time");
+        const name = formData.get("name") as String;
+        const email = formData.get("email");
+        const link = formData.get("link");
+        const invite = formData.get("invite");
 
-        return Response.json({ done: 'true' });
+        if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+
+            return Response.json({ error: 'Invalid emailjs credentials' });
+
+        }
+
+        const application = await Application.findOne({ _id: _id });
+
+        const post = await Post.findOne({ _id: application.post_id })
+
+        const body = `Hello ${name.toUpperCase()} ,<br>
+<p style="text-align:justify">${invite}</p>
+Date : ${date}<br>
+Time : ${time}<br>
+Meeting Link : <a href="${link}">${link}</a><br><br>
+If you have any questions or require further information prior to the interview, please 
+feel free to reach out. We look forward to speaking with you.
+`;
+
+        const subject = `Invitation for Virtual Interview at ${post.companyName} - ${post.role} Intern`
+
+        const res = await emaijs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+
+            body,
+            subject,
+            email
+
+        }, {
+            publicKey: process.env.EMAILJS_PUBLICKEY,
+            privateKey: process.env.EMAILJS_PRIVATEKEY
+        })
+
+        if (res.status == 200) {
+
+            application.status = "interviewed";
+            application.save()
+
+            return Response.json({ done: 'true' });
+
+        }
+
+        return Response.json({ done: 'false' });
+
+    } else if (formData.has("letter")) {
+
+        const _id = formData.get("_id");
+        const date = formData.get("date");
+        const time = formData.get("time");
+        const name = formData.get("name") as String;
+        const email = formData.get("email");
+        const address = formData.get("address");
+        const letter = formData.get("letter");
+        const role = formData.get("role");
+        const type = formData.get("type");
+
+        if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+
+            return Response.json({ error: 'Invalid emailjs credentials' });
+
+        }
+
+        const application = await Application.findOne({ _id: _id });
+
+        const post = await Post.findOne({ _id: application.post_id })
+
+
+        const body = `Hello ${name.toUpperCase()} ,<br>
+<p style="text-align:justify">${letter}</p>
+Date : ${date}<br>
+Time : ${time}<br>
+Location : ${address}<br>
+Role : ${role}<br>
+Type : ${type}<br>
+We congratulate you on your selection and look forward to welcoming you.
+`;
+
+        const subject = `Selection Confirmation – ${role} Internship Position In ${post.companyName}`
+
+        const res = await emaijs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+
+            body,
+            subject,
+            email
+
+        }, {
+            publicKey: process.env.EMAILJS_PUBLICKEY,
+            privateKey: process.env.EMAILJS_PRIVATEKEY
+        })
+
+        if (res.status == 200) {
+
+            application.status = "recruited";
+
+            if (post.vacancies > post.recruited) {
+
+                post.recruited = post.recruited + 1;
+
+                post.save()
+
+            }
+
+            application.save()
+
+            return Response.json({ done: 'true' });
+
+        }
+
+        return Response.json({ done: 'false' });
     }
 
 }
@@ -187,7 +301,7 @@ export async function GET(req: Request) {
     } else if (id) {
 
         //let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
-        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email");
+        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email period");
 
         if (!application) {
 
@@ -197,7 +311,7 @@ export async function GET(req: Request) {
 
         const post = await Post.findOne({ _id: application.post_id });
 
-        const returnObj = { ...application, jd: post.jd }
+        const returnObj = { ...application, jd: post.jd, address: post.companyAddress, companyName: post.companyName, role: post.role, type: post.type }
 
         return Response.json(returnObj);
 
@@ -220,7 +334,7 @@ export async function GET(req: Request) {
         }
 
 
-        const applications = await Application.find({ status: "selected", post_id: { $in: posts } });
+        const applications = await Application.find({ status: { $in: ["selected", "interviewed", "recruited"] }, post_id: { $in: posts } });
 
         if (!applications) {
 
@@ -323,6 +437,19 @@ export async function PUT(req: Request) {
         }
 
         application.status = review;
+
+        if (review == "rejected" && application.status == 'recruited') {
+
+            const post = await Post.findOne({ _id: application.post_id });
+
+            if (post.recruited > 0) {
+
+                post.recruited = post.recruited - 1;
+                post.save();
+
+            }
+
+        }
 
         application.save();
 

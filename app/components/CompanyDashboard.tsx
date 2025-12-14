@@ -77,10 +77,17 @@ interface Form {
     status: string;
     marks: Number;
     email: string;
+    address: string;
+    role: string;
+    companyName: string;
+    period: string;
+    type: string;
 
 }
 
 export default function CompanyDashboard({ email }: { email: string }) {
+
+    const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
     const roles = [
 
@@ -129,15 +136,17 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [hide, setHide] = useState(false);
     const [marks, setMarks] = useState(0);
     const [showInvite, setShowInvite] = useState(false);//to display pop up to customize interview invitation email.
+    const [sendSelected, setSendSelected] = useState(false);//to display pop up to send selected email.
+    const [error, setError] = useState('');
 
     //set states for invitation email to student
 
     const inviteTemplate = `
-Thank you for your interest in the Intern position at our company. We were impressed by your background and would like to invite you to attend a virtual interview.
+Thank you for your interest in the Intern position at our company. We 
+were impressed by your background and would like to invite you to attend a virtual interview.
 
 The interview details, including the scheduled time and meeting link, are provided below.
-
-Please feel free to reach out if you have any questions prior to the interview. We look forward to speaking with you.`
+`
 
     const minDate = () => {
 
@@ -195,6 +204,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
     const [invite, setInvite] = useState(inviteTemplate)
     const [inviteLink, setInviteLink] = useState('https://meet.google.com/landing?hs=197&authuser=0')
 
+
     const [load, setLoad] = useState(false);
 
     const [myPosts, setMyPosts] = useState<Post[] | null>(null)
@@ -215,9 +225,20 @@ Please feel free to reach out if you have any questions prior to the interview. 
             jd: '',
             status: '',
             marks: 0,
-            email: ''
+            email: '',
+            address: '',
+            role: '',
+            companyName: '',
+            period: '',
+            type: ''
         }
     );
+
+    //states for selection letter
+
+    const [selectedDate, setSelectedDate] = useState(getMinDate)
+    const [selectedTime, setSelectedTime] = useState(MinTime)
+    const [letter, setLetter] = useState('')
 
     useEffect(() => {
 
@@ -440,7 +461,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
     }
 
-    const review = async (x: string) => {
+    const review = async (id = "", x: string) => {
 
         try {
 
@@ -448,7 +469,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
             const formData = new FormData();
 
-            formData.append("id", data._id);
+            formData.append("id", data._id || id);
             formData.append("review", encoded);
 
             const res = await axios.put('/api/applications', formData);
@@ -608,17 +629,62 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
 
     }
+    const getSelectionData = async (id: string) => {
+
+        try {
+
+            const encoded = encodeURIComponent(id);
+
+            const res = await axios.get(`/api/applications?id=${encoded}`);
+
+            if (res.status != 200) {
+
+                alert('Check your internet connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            setData({ ...res.data._doc, jd: res.data.jd, address: res.data.address, role: res.data.role, type: res.data.type })
+
+            setLetter(`
+We are pleased to inform you that you have been selected for the ${res.data.role} Internship at ${res.data.companyName}. After careful review of your application and interview, we were impressed 
+with your skills, enthusiasm, and potential, and we believe you will be a valuable addition to our team.
+    
+Your internship is scheduled to commence on ${selectedDate.split("-")[2] + " " + months[parseInt(selectedDate.split("-")[1]) - 1] + " " + selectedDate.split("-")[0]} and will continue until ${data.period == '6m' ? '6 Months' : '1 Year'}. The internship will be conducted ${res.data.type}.
+    
+Further details regarding onboarding, reporting structure, and required documentation will be shared with you shortly.
+    `)
+            setSendSelected(true);
+
+        } catch (err) {
+
+            alert("Error showing job description: " + err);
+            return;
+
+        }
+
+
+    }
 
     const handleSubmitEmail = async (e: any) => {
 
         e.preventDefault();
 
+        if (error) return;
+
         try {
 
             const formData = new FormData();
 
-            formData.append("date", inviteDate);
-            formData.append("time", inviteTime);
+            formData.append("_id", data._id);
+            formData.append("date", inviteDate.split("-")[2] + " " + months[parseInt(inviteDate.split("-")[1]) - 1] + " " + inviteDate.split("-")[0]);
+            formData.append("time", (`${inviteTime.split(":")[0] > '12' ? parseInt(inviteTime.split(":")[0]) - 12 : inviteTime.split(":")[0]}`) + `:${inviteTime.split(":")[1]} ${inviteTime.split(":")[0] > '12' ? "PM" : "AM"}`);
             formData.append("name", data.firstName + " " + data.lastName);
             formData.append("email", data.email);
             formData.append("link", inviteLink);
@@ -641,6 +707,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
             if (res.data.done == 'true') {
 
+                setLoad(!load)
                 alert('email sent');
                 setShowInvite(false)
                 setInviteDate(getMinDate)
@@ -649,7 +716,62 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
         } catch (err) {
 
-            alert("Error sending email: " + err);
+            console.log("Error sending email: " + err);
+            alert("Check your internet connection...")
+            return;
+
+        }
+    }
+
+    const handleSelected = async (e: any) => {//to send selected mail to student
+
+        e.preventDefault();
+
+        if (error) return;
+
+        try {
+
+            const formData = new FormData();
+
+            formData.append("_id", data._id);
+            formData.append("date", selectedDate.split("-")[2] + " " + months[parseInt(selectedDate.split("-")[1]) - 1] + " " + selectedDate.split("-")[0]);
+            formData.append("time", (`${selectedTime.split(":")[0] > '12' ? parseInt(selectedTime.split(":")[0]) - 12 : selectedTime.split(":")[0]}`) + `:${selectedTime.split(":")[1]} ${selectedTime.split(":")[0] > '12' ? "PM" : "AM"}`);
+            formData.append("name", data.firstName + " " + data.lastName);
+            formData.append("email", data.email);
+            formData.append("address", data.address);
+            formData.append("letter", letter);
+            formData.append("role", role);
+            formData.append("type", type);
+
+
+            const res = await axios.post('/api/applications', formData)
+
+            if (res.status != 200) {
+
+                alert('Check your internet connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+
+            }
+
+            if (res.data.done == 'true') {
+
+                alert('email sent');
+                setSendSelected(false)
+                setSelectedDate(getMinDate)
+                setSelectedTime(getMinTimeForDate())
+                setLoad(!load);
+            }
+
+        } catch (err) {
+
+            console.log("Error sending email: " + err);
+            alert("Check your internet connection...")
             return;
 
         }
@@ -673,7 +795,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
                 {/* shortlisted student list */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                     <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => app.status == "selected").length + ')' : ''}</p>
+                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => ["selected", "interviewed", "recruited"].includes(app.status)).length + ')' : ''}</p>
                         <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
@@ -715,6 +837,9 @@ Please feel free to reach out if you have any questions prior to the interview. 
                                             portfolio={application.portfolio}
                                             setShowInvite={() => getInviteData(application._id)}
                                             contact={application.contactNumber}
+                                            selected={() => getSelectionData(application._id)}
+                                            reject={() => review(application._id, "rejected")}
+
 
                                         />
 
@@ -774,7 +899,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
                 {/* applications list received by students */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                     <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.length > 0 ? '(' + applications.filter(app => app.status != "selected").length + ')' : ''}</p>
+                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.length > 0 ? '(' + applications.filter(app => !["selected", "interviewed", "recruited"].includes(app.status)).length + ')' : ''}</p>
                         <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
@@ -811,7 +936,7 @@ Please feel free to reach out if you have any questions prior to the interview. 
                                             showJd={() => showJD(application._id, application.status)}
                                             firstName={application.firstName}
                                             degree={application.degree}
-                                            cancel={() => review("cancelled")}
+                                            cancel={() => review("", "cancelled")}
                                             lastName={application.lastName}
 
                                         />
@@ -937,11 +1062,14 @@ Please feel free to reach out if you have any questions prior to the interview. 
                                         <input type="date" min={getMinDate} value={inviteDate} onChange={(e) => setInviteDate(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
                                     </div>
-                                    <div className="w-full flex flex-col pb-2">
+                                    <div className="w-full flex flex-col">
 
                                         <label className="text-lg text-gray-500">Time</label>
-                                        <input type="time" min={getMinTimeForDate()} value={inviteTime} onChange={(e) => { e.target.value < getMinTimeForDate() ? setInviteTime(getMinTimeForDate()) : setInviteTime(e.target.value) }} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                        <input type="time" value={inviteTime} onChange={(e) => { if (e.target.value >= getMinTimeForDate()) { setInviteTime(e.target.value); setError('') } else { setInviteTime(e.target.value); setError('Please choose valid time') } }} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
+                                        <div className="w-full h-2">
+                                            <span className={` text-red-400 text-sm italic ${!error ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="w-full flex flex-col pb-2">
@@ -965,6 +1093,60 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
                                     <label className="text-lg text-gray-500">Invitation</label>
                                     <textarea rows={10} required value={invite} onChange={(e) => setInvite(e.target.value)} className="outline-none  rounded-lg px-4 py-1 bg-blue-100 border border-blue-200 w-full resize-none text-justify" />
+                                </div>
+                            </div>
+                            <input type="submit" value='Send Email' className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+
+                        </form>
+                    </div>
+                </Modal>
+
+            }
+
+            {sendSelected &&
+
+                <Modal show={sendSelected} setShow={setSendSelected}>
+                    <div className="justify-center items-center flex h-[90vh]">
+                        <form onSubmit={handleSelected} className="w-[72%] shadow-xl px-10 py-2 rounded-lg flex flex-col justify-center items-center bg-gray-50 min-w-[380px]">
+                            <div className=" space-y-2 min-w-[145px] w-full">
+                                <div className="flex flex-row gap-5">
+                                    <div className="w-full flex flex-col pb-2">
+
+                                        <label className="text-lg text-gray-500">Date</label>
+                                        <input type="date" min={getMinDate} value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                    </div>
+                                    <div className="w-full flex flex-col">
+
+                                        <label className="text-lg text-gray-500">Time</label>
+                                        <input type="time" value={selectedTime} onChange={(e) => { if (e.target.value >= getMinTimeForDate()) { setSelectedTime(e.target.value); setError('') } else { setSelectedTime(e.target.value); setError('Please choose valid time') } }} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                        <div className="w-full h-2">
+                                            <span className={` text-red-400 text-sm italic ${!error ? 'opacity-0' : 'opacity-100'}`}>{error}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Candidate's Name</label>
+                                    <input readOnly type="text" value={data.firstName + " " + data.lastName} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Candidate's Email</label>
+                                    <input readOnly inputMode="numeric" value={data.email} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Company Address</label>
+                                    <input readOnly type="text" value={data.address} onChange={(e) => setInviteLink(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                </div>
+                                <div className="w-full flex flex-col pb-2">
+
+                                    <label className="text-lg text-gray-500">Selection Letter</label>
+                                    <textarea rows={10} required value={letter} onChange={(e) => setLetter(e.target.value)} className="outline-none  rounded-lg px-4 py-1 bg-blue-100 border border-blue-200 w-full resize-none text-justify" />
                                 </div>
                             </div>
                             <input type="submit" value='Send Email' className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
@@ -1007,8 +1189,8 @@ Please feel free to reach out if you have any questions prior to the interview. 
 
                                 <div className="w-full flex flex-row sm:gap-36 justify-evenly sm:justify-normal">
                                     <div className="flex flex-row sm:w-[40%] w-[50%] gap-3 sm:gap-6 items-center">
-                                        <div onClick={marks > 0 ? () => review("selected") : () => alert('Do not forget to mark')} className="w-[45%] sm:w-[50%] flex justify-center items-center h-9 text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">Accept</div>
-                                        <div onClick={["rejected"].includes(data.status) ? close : () => review("rejected")} className="w-[45%] sm:w-[50%] h-9  flex justify-center items-center text-lg font-bold bg-red-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-red-300 hover:bg-transparent shadow-black">{["rejected"].includes(data.status) ? 'Keep Rejected' : 'Reject'}</div>
+                                        <div onClick={marks > 0 ? () => review("", "selected") : () => alert('Do not forget to mark')} className="w-[45%] sm:w-[50%] flex justify-center items-center h-9 text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">Accept</div>
+                                        <div onClick={["rejected"].includes(data.status) ? close : () => review("", "rejected")} className="w-[45%] sm:w-[50%] h-9  flex justify-center items-center text-lg font-bold bg-red-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-red-300 hover:bg-transparent shadow-black">{["rejected"].includes(data.status) ? 'Keep Rejected' : 'Reject'}</div>
                                     </div>
                                     <div className="flex items-center justify-center sm:w-[35%]">
                                         <div className="py-1 flex items-center justify-center flex-row sm:w-[300px] gap-2 px-2 sm:gap-2 bg-blue-400">

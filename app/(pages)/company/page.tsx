@@ -188,6 +188,7 @@ export default function CompanySignup() {
                 if (data.error) {
 
                     console.log('Error from server: ' + data.error);
+                    alert(data.error)
                     return;
 
                 }

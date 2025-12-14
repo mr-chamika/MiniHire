@@ -89,16 +89,24 @@ export async function POST(req: Request) {
 
                 }
 
+                const body = `Hello ${firstName},<br>
+Your one-time verification code is:
+<h2 style="font-weight:bold">${otp}</h2>
+This code will expire in 5 minutes.`;
+
+                const subject = `Welcome to MiniHelp`
+
                 const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
 
-                    to_name: firstName + " " + lastName,
-                    otp_code: otp,
-                    email: email
+                    body,
+                    subject,
+                    email
 
                 }, {
                     publicKey: process.env.EMAILJS_PUBLICKEY,
                     privateKey: process.env.EMAILJS_PRIVATEKEY
                 })
+
 
                 if (res.status != 200) {
 
@@ -180,11 +188,18 @@ export async function POST(req: Request) {
 
                 }
 
+                const body = `Hello ${name},<br>
+Your one-time verification code is:
+<h2 style="font-weight:bold">${otp}</h2>
+This code will expire in 5 minutes.`;
+
+                const subject = `Welcome to MiniHelp`
+
                 const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
 
-                    to_name: name,
-                    otp_code: otp,
-                    email: email
+                    body,
+                    subject,
+                    email
 
                 }, {
                     publicKey: process.env.EMAILJS_PUBLICKEY,
