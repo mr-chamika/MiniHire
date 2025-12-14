@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Clock from '../../public/assets/clock.png';
-import Contact from '../../public/assets/contact.png';
+import Student from '../../public/assets/students.png';
+import Degree from '../../public/assets/degree.png';
 
-export default function Application({ _id, role, type, status, createdAt, showJd, contact, period, cancel }: { _id: string, role: string, type: string, status: string, createdAt: string, showJd: () => void, contact: string, period: string, cancel: () => void }) {
+export default function Application_Company({ _id, role, type, status, createdAt, showJd, firstName, degree, cancel, lastName }: { _id: string, role: string, type: string, status: string, createdAt: string, showJd: () => void, firstName: string, lastName: string, degree: string, cancel: () => void }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -27,13 +27,13 @@ export default function Application({ _id, role, type, status, createdAt, showJd
             <div className="flex flex-row pb-3 py-2 gap-2">
 
                 <div className="flex flex-col items-center mb-3 sm:mb-0 sm:flex-row gap-1 h-4">
-                    <Image src={Clock} alt="period" width={16} />
-                    <p className="font-bold flex items-center">{period[0]} {period.endsWith("m") ? "Months" : "Years"}</p>
+                    <Image src={Degree} alt="degree" width={16} />
+                    <p className="font-bold flex items-center">{degree}</p>
                 </div>
 
                 <div className="flex flex-col items-center mb-3 sm:mb-0 sm:flex-row gap-1 h-4">
-                    <Image src={Contact} alt="company name" width={16} />
-                    <p className="font-bold flex items-center">{contact}</p>
+                    <Image src={Student} alt="company name" width={16} />
+                    <p className="font-bold flex items-center">{firstName + " " + lastName}</p>
                 </div>
 
             </div>
@@ -41,8 +41,8 @@ export default function Application({ _id, role, type, status, createdAt, showJd
             <div className="w-full flex flex-row justify-between items-center mt-1">
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-[15px]'>
 
-                    <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">{status == 'cancelled' ? 'Reapply' : 'View'}</button>
-                    {!["cancelled", "rejected"].includes(status) && <button onClick={cancel} className="w-[50%] bg-red-400 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
+                    <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">{["cancelled", "rejected"].includes(status) ? 'View' : 'Review'}</button>
+                    {/* {!["cancelled", "rejected"].includes(status) && <button onClick={cancel} className="w-[50%] bg-red-400 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Reject</button>} */}
 
                 </div>
                 <div className="flex flex-row w-full h-4 items-start justify-end">

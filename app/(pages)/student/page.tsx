@@ -54,6 +54,7 @@ export default function StudentSignup() {
     const [degree, setDegree] = useState(degreeOptions[0].value);
     const [linkedin, setLinkedin] = useState('');
     const [portfolio, setPortfolio] = useState('');
+    const [github, setGithub] = useState('');
     const [resume, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [errorCP, setErrorCP] = useState('');
@@ -62,6 +63,7 @@ export default function StudentSignup() {
     const [otp, setOtp] = useState(Array(6).fill(""));
     const [message, setMessage] = useState("");
     const [role, setRole] = useState("");
+    const [contact, setContact] = useState("");
 
 
     const handleChange = (value: string, index: number) => {
@@ -136,7 +138,7 @@ export default function StudentSignup() {
                 lastName.trim().length !== 0 &&
                 linkedin.trim().length !== 0 &&
                 portfolio.trim().length !== 0 &&
-                resume &&
+                resume && github && contact &&
                 password.trim().length !== 0 &&
                 confirmPassword.trim().length !== 0) {
 
@@ -160,10 +162,12 @@ export default function StudentSignup() {
                 const formData = new FormData();
 
                 formData.append("email", email.toLocaleLowerCase());
+                formData.append("contactNumber", contact);
                 formData.append("firstName", firstName.toLocaleLowerCase());
                 formData.append("lastName", lastName.toLocaleLowerCase());
                 formData.append("role", "student");
                 formData.append("linkedin", linkedin.toLocaleLowerCase());
+                formData.append("github", github);
                 formData.append("portfolio", portfolio.toLocaleLowerCase());
                 formData.append("resume", resume);
                 formData.append("password", password);
@@ -189,6 +193,7 @@ export default function StudentSignup() {
                 if (data.error) {
 
                     console.log('Error from server: ' + data.error);
+                    alert(data.error)
                     return;
 
                 }
@@ -220,12 +225,12 @@ export default function StudentSignup() {
     return (
 
         <div className='min-h-screen  w-full flex items-center justify-center'>
-            <div className="w-[70%] min-w-[500px] gap-12 flex-col flex items-center p-5">
+            <div className="w-[70%] min-w-[500px] gap-6 flex-col flex items-center py-2">
 
                 <div className="w-full flex justify-center">
                     <h1 className='md:text-5xl text-3xl font-semibold'>Welcome to MiniHire</h1>
                 </div>
-                <form onSubmit={handleSubmit} className="w-[82%] shadow-xl px-10 pt-10 pb-2 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
+                <form onSubmit={handleSubmit} className="min-w-[92%] shadow-xl px-10 pt-10 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
                     <div className="gap-5 flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full ">
                         <div className="sm:w-[50%] space-y-5 min-w-[145px]">
                             <div className="w-full flex flex-col pb-2">
@@ -240,6 +245,14 @@ export default function StudentSignup() {
                                 <input required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
 
                             </div>
+
+                            <div className="w-full flex flex-col pb-2">
+
+                                <label className="text-lg text-gray-500">Contact Number</label>
+                                <input required inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="07xxxxxxxx" value={contact} onChange={(e) => setContact(e.target.value.replace(/[^0-9]/g, ''))} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+
+                            </div>
+
                             <div className="w-full flex flex-col">
 
                                 <label className="text-lg text-gray-500">Email</label>
@@ -253,7 +266,7 @@ export default function StudentSignup() {
                                 <label className="text-lg text-gray-500">Password</label>
                                 <div className="flex bg-blue-100 border border-blue-200 flex-row items-center rounded-lg">
 
-                                    <input required type={show ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="outline-none  px-2 py-1 w-full bg-blue-100" />
+                                    <input required type={show ? "text" : "password"} value={password} onChange={(e) => { e.target.value.length < 8 ? setError("Min length 8") : setError(''); setPassword(e.target.value) }} className="outline-none  px-2 py-1 w-full bg-blue-100" />
                                     <Image onClick={() => setShow(!show)} src={show ? Unhide : Hide} alt="" width={20} className="mr-2 hover:cursor-pointer" />
 
                                 </div>
@@ -302,6 +315,11 @@ export default function StudentSignup() {
                             </div>
                             <div className="w-full flex flex-col pb-2">
 
+                                <label className="text-lg text-gray-500">GitHub Profile</label>
+                                <input required type="url" value={github} pattern="https://github.com/.*" onChange={(e) => setGithub(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                            </div>
+                            <div className="w-full flex flex-col pb-2">
+
                                 <label className="text-lg text-gray-500">Your Portfolio</label>
                                 <input required type="url" value={portfolio} onChange={(e) => setPortfolio(e.target.value)} className="outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
                             </div>
@@ -336,6 +354,7 @@ export default function StudentSignup() {
                             className="bg-white p-6 rounded-xl shadow-md w-80 text-center"
                         >
                             <h2 className="text-xl font-semibold mb-4">Enter OTP</h2>
+                            <p>Sent to {email}</p>
 
                             <div className="flex justify-between mb-4">
                                 {otp.map((digit, index) => (

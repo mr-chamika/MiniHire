@@ -78,13 +78,13 @@ export default function AuthTopbarLogged() {
 
                 <div className="w-[80%] flex justify-center items-center">
 
-                    <p className="text-3xl font-bold font-[Montserrat]">Welcome {name.charAt(0).toUpperCase() + name.slice(1)} !</p>
+                    <p className="text-sm sm:text-3xl font-bold font-[Montserrat]">Welcome {name.charAt(0).toUpperCase() + name.slice(1)} !</p>
 
                 </div>
 
                 <div className="flex items-center gap-4">
 
-                    <button className="hover:cursor-pointer" onClick={toProfile}><Image className="rounded-full w-10 h-10" src={Profile} alt="Profile picture" /></button>
+                    <button className="hover:cursor-pointer" onClick={toProfile}><Image className="rounded-full max-w-10 h-10" src={Profile} alt="Profile picture" /></button>
                     <button className="bg-red-500 text-white font-bold px-3 pb-2 pt-1 rounded-md hover:cursor-pointer" onClick={() => setModal(true)}>Logout</button>
 
                 </div>

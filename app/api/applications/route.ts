@@ -1,8 +1,10 @@
 import { Database } from "@/db";
 import { Application } from "@/models/Application";
+import { Company } from "@/models/Company";
 import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
 import { URL } from "url";
+import emaijs from '@emailjs/nodejs'
 
 export async function POST(req: Request) {
 
@@ -17,11 +19,13 @@ export async function POST(req: Request) {
         const degree = formData.get("degree");
         const portfolio = formData.get("portfolio");
         const linkedin = formData.get("linkedin");
+        const github = formData.get("github");
         const resume = formData.get("resume");
         const post_id = formData.get("post_id");
         const email = formData.get("email");
+        const contactNumber = formData.get("contactNumber");
 
-        if (!firstName || !lastName || !university || !degree || !portfolio || !linkedin || !resume || !post_id || !email) {
+        if (!firstName || !lastName || !contactNumber || !github || !university || !degree || !portfolio || !linkedin || !resume || !post_id || !email) {
 
             return Response.json({ message: 'Missing some data to save...' });
 
@@ -56,8 +60,10 @@ export async function POST(req: Request) {
             degree,
             portfolio,
             linkedin,
+            github,
             resume,
-            post_id
+            post_id,
+            contactNumber,
 
         })
 
@@ -69,6 +75,124 @@ export async function POST(req: Request) {
 
         return Response.json({ done: 'true' });
 
+    } else if (formData.has("invite")) {
+
+        const _id = formData.get("_id");
+        const date = formData.get("date");
+        const time = formData.get("time");
+        const name = formData.get("name") as String;
+        const email = formData.get("email");
+        const link = formData.get("link");
+        const invite = formData.get("invite");
+
+        if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+
+            return Response.json({ error: 'Invalid emailjs credentials' });
+
+        }
+
+        const application = await Application.findOne({ _id: _id });
+
+        const post = await Post.findOne({ _id: application.post_id })
+
+        const body = `Hello ${name.toUpperCase()} ,<br>
+<p style="text-align:justify">${invite}</p>
+Date : ${date}<br>
+Time : ${time}<br>
+Meeting Link : <a href="${link}">${link}</a><br><br>
+If you have any questions or require further information prior to the interview, please 
+feel free to reach out. We look forward to speaking with you.
+`;
+
+        const subject = `Invitation for Virtual Interview at ${post.companyName} - ${post.role} Intern`
+
+        const res = await emaijs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+
+            body,
+            subject,
+            email
+
+        }, {
+            publicKey: process.env.EMAILJS_PUBLICKEY,
+            privateKey: process.env.EMAILJS_PRIVATEKEY
+        })
+
+        if (res.status == 200) {
+
+            application.status = "interviewed";
+            application.save()
+
+            return Response.json({ done: 'true' });
+
+        }
+
+        return Response.json({ done: 'false' });
+
+    } else if (formData.has("letter")) {
+
+        const _id = formData.get("_id");
+        const date = formData.get("date");
+        const time = formData.get("time");
+        const name = formData.get("name") as String;
+        const email = formData.get("email");
+        const address = formData.get("address");
+        const letter = formData.get("letter");
+        const role = formData.get("role");
+        const type = formData.get("type");
+
+        if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+
+            return Response.json({ error: 'Invalid emailjs credentials' });
+
+        }
+
+        const application = await Application.findOne({ _id: _id });
+
+        const post = await Post.findOne({ _id: application.post_id })
+
+
+        const body = `Hello ${name.toUpperCase()} ,<br>
+<p style="text-align:justify">${letter}</p>
+Date : ${date}<br>
+Time : ${time}<br>
+Location : ${address}<br>
+Role : ${role}<br>
+Type : ${type}<br>
+We congratulate you on your selection and look forward to welcoming you.
+`;
+
+        const subject = `Selection Confirmation – ${role} Internship Position In ${post.companyName}`
+
+        const res = await emaijs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+
+            body,
+            subject,
+            email
+
+        }, {
+            publicKey: process.env.EMAILJS_PUBLICKEY,
+            privateKey: process.env.EMAILJS_PRIVATEKEY
+        })
+
+        if (res.status == 200) {
+
+            application.status = "recruited";
+
+            if (post.vacancies > post.recruited) {
+
+                post.recruited = post.recruited + 1;
+
+                post.save()
+
+            }
+
+            application.save()
+
+            return Response.json({ done: 'true' });
+
+        }
+
+        return Response.json({ done: 'false' });
     }
 
 }
@@ -79,6 +203,9 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const fo = searchParams.get("fo");
+    const email = searchParams.get("toCompany");
+    const id = searchParams.get("id");
+    const selectedTo = searchParams.get("selectedTo");
 
     if (fo) {
 
@@ -114,6 +241,140 @@ export async function GET(req: Request) {
 
         return Response.json(toReturn);
 
+    } else if (email) {
+
+        const comapny = await Company.findOne({ email: email }, "name");
+
+        if (!comapny) {
+
+            return Response.json([]);
+
+        }
+
+        const posts = await Post.find({ companyName: comapny.name }).distinct("_id");
+
+        if (!posts) {
+
+            return Response.json([]);
+
+        }
+
+
+        const applications = await Application.find({ post_id: { $in: posts } });
+
+        if (!applications) {
+
+            return Response.json([]);
+
+        }
+
+        let toReturn = [];
+
+        for (const app of applications) {
+
+            let post = await Post.findOne({ _id: app.post_id }, "role contactNumber jd period type");
+
+            toReturn.push({
+
+                period: post.period,
+                role: post.role,
+                type: post.type,
+                firstName: app.firstName,
+                lastName: app.lastName,
+                email: app.email,
+                university: app.university,
+                resume: app.resume,
+                portfolio: app.portfolio,
+                linkedin: app.linkedin,
+                _id: app._id,
+                degree: app.degree,
+                createdAt: app.createdAt,
+                status: app.status,
+                post_id: app.post_id,
+
+            })
+
+        }
+
+        return Response.json(toReturn);
+
+    } else if (id) {
+
+        //let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
+        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email period");
+
+        if (!application) {
+
+            return Response.json({ message: "This application no longer exists." });
+
+        }
+
+        const post = await Post.findOne({ _id: application.post_id });
+
+        const returnObj = { ...application, jd: post.jd, address: post.companyAddress, companyName: post.companyName, role: post.role, type: post.type }
+
+        return Response.json(returnObj);
+
+    } else if (selectedTo) {
+
+        const comapny = await Company.findOne({ email: selectedTo }, "name");
+
+        if (!comapny) {
+
+            return Response.json([]);
+
+        }
+
+        const posts = await Post.find({ companyName: comapny.name }).distinct("_id");
+
+        if (!posts) {
+
+            return Response.json([]);
+
+        }
+
+
+        const applications = await Application.find({ status: { $in: ["selected", "interviewed", "recruited"] }, post_id: { $in: posts } });
+
+        if (!applications) {
+
+            return Response.json([]);
+
+        }
+
+        let toReturn = [];
+
+        for (const app of applications) {
+
+            let post = await Post.findOne({ _id: app.post_id }, "role contactNumber jd period type");
+
+            toReturn.push({
+
+                period: post.period,
+                role: post.role,
+                type: post.type,
+                firstName: app.firstName,
+                lastName: app.lastName,
+                email: app.email,
+                university: app.university,
+                resume: app.resume,
+                portfolio: app.portfolio,
+                linkedin: app.linkedin,
+                _id: app._id,
+                degree: app.degree,
+                createdAt: app.createdAt,
+                status: app.status,
+                post_id: app.post_id,
+                marks: app.marks,
+                contactNumber: app.contactNumber,
+                github: app.github
+
+            })
+
+        }
+
+        return Response.json(toReturn);
+
     }
 
 }
@@ -137,23 +398,13 @@ export async function PUT(req: Request) {
 
     const id = formData.get("id");
     const operation = formData.get("operation");
-
-    const application = await Application.findOne({ _id: id });
-
-    if (!operation) {
-
-        return Response.json({ message: 'Invalid operation...' });
-
-    }
-
-    if (!application) {
-
-        return Response.json({ message: 'Invalid application...' });
-
-    }
+    const review = formData.get("review");
+    const marks = formData.get("marks");
 
 
     if (operation == "cancel") {
+
+        const application = await Application.findOne({ _id: id });
 
         if (application.status == 'selected') {//cv s that rejected by comapny or cancel by student after selected can not be reapply.
 
@@ -175,7 +426,53 @@ export async function PUT(req: Request) {
 
         return Response.json({ done: 'true' });
 
+    } else if (review) {
+
+        const application = await Application.findOne({ _id: id });
+
+        if (!application) {
+
+            return Response.json({ message: 'No such application exists...' })
+
+        }
+
+        application.status = review;
+
+        if (review == "rejected" && application.status == 'recruited') {
+
+            const post = await Post.findOne({ _id: application.post_id });
+
+            if (post.recruited > 0) {
+
+                post.recruited = post.recruited - 1;
+                post.save();
+
+            }
+
+        }
+
+        application.save();
+
+        return Response.json({ done: 'true' });
+
+    } else if (marks && id) {
+
+        let application = await Application.findOne({ _id: id });
+
+        if (!application) {
+
+            return Response.json({ message: "This application no longer exists." });
+
+        }
+
+        application.marks = marks;
+
+        application.save()
+
+        return Response.json({ done: 'true' });
+
     }
+
     return Response.json({ done: 'false' });
 
 }

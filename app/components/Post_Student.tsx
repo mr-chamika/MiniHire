@@ -27,7 +27,7 @@ export default function Post_Student({ _id, role, type, description, period, con
 
             </div>
             <div onClick={showJd}>
-                <p className="italic text-sm mr-16 ml-10 min-w-[50%] text-justify py-3">{description}</p>
+                <p className="italic text-sm mr-16 ml-10 min-w-[50%] text-justify py-3 break-words">{description}</p>
 
                 <div className="px-4 w-full flex flex-row justify-between pt-1">
                     <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[80%] text-sm sm:text-lg'>

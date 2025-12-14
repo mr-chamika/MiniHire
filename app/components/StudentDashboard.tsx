@@ -40,6 +40,8 @@ interface Form {
     linkedin: string;
     resume: string;
     post_id: string;
+    contactNumber: string;
+    github: string;
 
 }
 interface Application {
@@ -83,7 +85,9 @@ export default function StudentDashboard({ email }: { email: string }) {
             portfolio: '',
             linkedin: '',
             resume: '',
-            post_id: ''
+            post_id: '',
+            contactNumber: '',
+            github: ''
         }
     );
 
@@ -152,9 +156,11 @@ export default function StudentDashboard({ email }: { email: string }) {
         formData.append("degree", data.degree);
         formData.append("portfolio", data.portfolio);
         formData.append("linkedin", data.linkedin);
+        formData.append("github", data.github);
         formData.append("resume", data.resume);
         formData.append("post_id", data.post_id);
         formData.append("email", email);
+        formData.append("contactNumber", data.contactNumber);
 
         const res = await axios.post('/api/applications', formData);
 
@@ -463,7 +469,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                     {/* shortlisted student list */}
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
-                        <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Saved</p>
+                        <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Saved {saved && saved.length > 0 ? '(' + saved?.length + ')' : ''}</p>
                         <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
                             {saved?.length == 0 ?
 
@@ -504,7 +510,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                     {/* this company created job post list */}
                     <section className=" sm:w-[80%] sm:min-w-[500px] min-h-[79vh] w-full rounded-lg bg-blue-50">
-                        <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Recently Posted</p>
+                        <p className="pt-2 text-center text-xl font-mono border-b-2 border-slate-100">Recently Posted {posts && posts.length > 0 ? '(' + posts?.length + ')' : ''}</p>
                         <div className="w-full h-[79vh] overflow-y-auto scroll-smooth scrollbar-hide">
                             {posts?.length == 0 ?
 
@@ -552,13 +558,13 @@ export default function StudentDashboard({ email }: { email: string }) {
                     {/* applications list received by students */}
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                         <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                            <p className="pt-2 text-center text-xl font-mono">Sent</p>
-                            <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer outline-none pr-3 self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+                            <p className="pt-2 text-center text-xl font-mono">Sent {applications && applications.length > 0 ? '(' + applications?.length + ')' : ''}</p>
+                            <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
-                                <option value="selected">Selected</option>
-                                <option value="pending">Pending</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option>
+                                <option value="pending">Pending {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'pending').length + ')' : ''}</option>
+                                <option value="rejected">Rejected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'rejected').length + ')' : ''}</option>
+                                <option value="cancelled">Cancelled {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'cancelled').length + ')' : ''}</option>
 
                             </select>
                         </div>
@@ -612,10 +618,10 @@ export default function StudentDashboard({ email }: { email: string }) {
                 <Modal show={showJd} setShow={closeSubmission}>
                     <div className={`py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center scrollbar-thin scrollbar-hide`}>
                         <div className="w-full h-[85vh]">
-                            {jd?.endsWith('.jpg') &&
+                            {(jd?.endsWith('.jpg') || jd?.endsWith('.jpeg')) &&
                                 <div className="flex justify-center items-center w-full">
                                     <div className="flex items-center justify-center w-[80%] h-[80%]">
-                                        <Image src={jd} alt="Your Logo" height={600} width={600} />
+                                        <Image src={jd} alt="Your Logo" width={440} height={100} />
                                     </div>
                                 </div>}
                         </div>

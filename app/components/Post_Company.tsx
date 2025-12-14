@@ -26,7 +26,7 @@ export default function Post_Company({ _id, role, type, description, period, rec
 
             </div>
 
-            <p className="italic text-sm px-5 min-w-[50%] text-justify py-3">{description}</p>
+            <p className="break-words italic text-sm px-5 min-w-[50%] text-justify py-3">{description}</p>
 
             <div className="px-4 w-full flex flex-row justify-between">
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[80%] text-sm sm:text-lg'>
