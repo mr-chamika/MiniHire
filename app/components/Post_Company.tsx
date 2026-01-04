@@ -5,7 +5,7 @@ import Contact from '../../public/assets/contact.png';
 import Created from '../../public/assets/edit.png';
 import Image from 'next/image';
 
-export default function Post_Company({ _id, role, type, description, period, recruited, vacancies, creatorName, createdAt }: { _id: string, role: string, type: string, description: string, period: string, recruited: string, vacancies: string, creatorName: string, createdAt: string }) {
+export default function Post_Company({ _id, role, type, description, period, recruited, vacancies, creatorName, createdAt, editing, hiding, isHidden }: { _id: string, role: string, type: string, description: string, period: string, recruited: string, vacancies: string, creatorName: string, createdAt: string, editing: () => void, hiding: () => void, isHidden: string }) {
 
     const months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -19,8 +19,8 @@ export default function Post_Company({ _id, role, type, description, period, rec
                 <p>{role == "SE" ? "Software Engineering Intern" : role == "QA" ? "Quality Assuarance Intern" : "N/A"} | {type == "remote" ? "Remote" : type == "hybrid" ? "Hybrid" : "Onsite"}</p>
                 <div className="flex flex-row justify-between gap-2">
 
-                    <button className="bg-blue-500 px-2 rounded-lg text-white pb-[2px] hover:border-b-blue-600 hover:border">Edit</button>
-                    <button className="bg-red-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Delete</button>
+                    <button onClick={editing} className="bg-blue-500 px-2 rounded-lg text-white pb-[2px] hover:border-b-blue-600 hover:border">Edit</button>
+                    <button onClick={hiding} className="bg-red-400 px-2 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">{isHidden == "hidden" ? "Show" : "Hide"}</button>
 
                 </div>
 

@@ -67,6 +67,7 @@ export default function LoginPage() {
                 if (!res.data.token && res.data.message) {
 
                     setError(res.data.message);
+                    setLoading(false);
                     return;
 
                 }

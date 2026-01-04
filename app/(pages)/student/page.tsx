@@ -64,7 +64,7 @@ export default function StudentSignup() {
     const [message, setMessage] = useState("");
     const [role, setRole] = useState("");
     const [contact, setContact] = useState("");
-
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (value: string, index: number) => {
         if (/^[0-9]?$/.test(value)) {
@@ -132,6 +132,7 @@ export default function StudentSignup() {
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
+        setLoading(true);
         try {
             if (email.trim().length !== 0 &&
                 firstName.trim().length !== 0 &&
@@ -200,6 +201,7 @@ export default function StudentSignup() {
 
                 if (data.errorResponse && data.errorResponse.errmsg.includes(`E11000 duplicate key error collection: MiniHire.students index: email_1 dup key:`)) {
 
+                    setLoading(false);
                     setErrorE('Email already exists');
                     return;
 
@@ -213,9 +215,13 @@ export default function StudentSignup() {
 
                 setModal(true);
 
+            } else {
+
+                setLoading(false);
+
             }
         } catch (err) {
-
+            setLoading(false);
             alert('Error Signing Up: ' + err);
 
         }
@@ -339,7 +345,7 @@ export default function StudentSignup() {
                             </div>
                         </div>
                     </div>
-                    <input type="submit" value='Sign Up As a Student' className="outline-none bg-green-500 text-white sm:w-[60%] w-full py-1 mt-5 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+                    <input type="submit" disabled={loading} value={loading ? 'Signing Up...' : 'Sign Up As a Student'} className="outline-none bg-green-500 text-white sm:w-[60%] w-full py-1 mt-5 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black disabled:opacity-50" />
                     <p className="py-2">Have an account? <Link href='/login' className="text-blue-500"><span>Login Here</span></Link></p>
                 </form>
             </div>

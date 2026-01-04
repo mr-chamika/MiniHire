@@ -41,8 +41,9 @@ export default function Application({ _id, role, type, status, createdAt, showJd
             <div className="w-full flex flex-row justify-between items-center mt-1">
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-[15px]'>
 
-                    <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">{status == 'cancelled' ? 'Reapply' : 'View'}</button>
-                    {!["cancelled", "rejected"].includes(status) && <button onClick={cancel} className="w-[50%] bg-red-400 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
+                    <button onClick={showJd} className="w-[50%] bg-green-400 px-1 rounded-lg text-white pb-[2px] hover:border-b-green-600 hover:border">{status == 'cancelled' ? 'Reapply' : status == 'recruited' ? 'Confirm' : 'View'}</button>
+                    {!["cancelled", "rejected", "recruited", "hired"].includes(status) && <button onClick={cancel} className="w-[50%] bg-red-400 rounded-lg text-white pb-[2px] hover:border-b-red-600 hover:border">Cancel</button>}
+                    {status == "hired" && <p className="font-bold">Hired</p>}
 
                 </div>
                 <div className="flex flex-row w-full h-4 items-start justify-end">

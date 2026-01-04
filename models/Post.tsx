@@ -14,6 +14,7 @@ const PostSchema = new Schema({
     period: { type: String, required: true },//6 months or 1 year
     description: String,
     jd: { type: String, required: true },//job description image
+    status: { type: String, default: "show" }//is post hidden or not
 
 }, { timestamps: true })
 
