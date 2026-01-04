@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Image from "next/image";
 
-import Profile from '../../public/assets/profile.jpg'
+import Profile from '../../public/assets/profile.png'
 import { jwtDecode } from "jwt-decode";
 
 interface Token {
@@ -84,7 +84,7 @@ export default function AuthTopbarLogged() {
 
                 <div className="flex items-center gap-4">
 
-                    <button className="hover:cursor-pointer" onClick={toProfile}><Image className="rounded-full max-w-10 h-10" src={Profile} alt="Profile picture" /></button>
+                    <button className="hover:cursor-pointer bg-white rounded-full px-1 pt-1" onClick={toProfile}><Image className="rounded-full max-w-10 h-10" src={Profile} alt="Profile picture" /></button>
                     <button className="bg-red-500 text-white font-bold px-3 pb-2 pt-1 rounded-md hover:cursor-pointer" onClick={() => setModal(true)}>Logout</button>
 
                 </div>
