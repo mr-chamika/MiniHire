@@ -2,6 +2,7 @@
 
 import CompanyDashboard from "@/app/components/CompanyDashboard";
 import StudentDashboard from "@/app/components/StudentDashboard";
+import AdminDashboard from "../../../../components/AdminDashboard";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -51,7 +52,7 @@ export default function Dashboard() {
 
                 <p>Loading...</p> :
 
-                role == "student" ?
+                role === "student" ?
 
                     <StudentDashboard
 
@@ -61,11 +62,27 @@ export default function Dashboard() {
 
                     :
 
-                    <CompanyDashboard
+                    role === "company" ?
 
-                        email={email}
+                        <CompanyDashboard
 
-                    />
+                            email={email}
+
+                        />
+
+                        :
+
+                        role === "admin" ?
+
+                            <AdminDashboard
+
+                                email={email}
+
+                            />
+
+                            :
+
+                            <p>Unknown role</p>
 
             }
         </div>

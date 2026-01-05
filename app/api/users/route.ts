@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import emailjs from "@emailjs/nodejs";
 import jwt from "jsonwebtoken";
 import { Company } from "@/models/Company";
+import { Admin } from "@/models/Admin";
 
 export async function POST(req: Request) {
 
@@ -94,7 +95,7 @@ Your one-time verification code is:
 <h2 style="font-weight:bold">${otp}</h2>
 This code will expire in 5 minutes.`;
 
-                const subject = `Welcome to MiniHelp`
+                const subject = `Welcome to MiniHire`
 
                 const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
 
@@ -151,7 +152,7 @@ This code will expire in 5 minutes.`;
 
             const otp = generateOTP();
 
-            //convert cv to byte sequence and save it in blob storage in vercel
+            //convert logo to byte sequence and save it in blob storage in vercel
             const buffer = Buffer.from(await logo.arrayBuffer());
             const blob = await put(logo.name, buffer, { access: 'public', addRandomSuffix: true, contentType: logo.type })
 
@@ -175,43 +176,42 @@ This code will expire in 5 minutes.`;
                 password: hashedPassword,
                 contactNumber,
                 otp,
-                expires: new Date(Date.now() + 1000 * 60 * 5)
+                expires: new Date(Date.now() + 1000 * 60 * 5),
+                verified: false
 
             })
 
-            if (newCompany) {
+            if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
 
+                return Response.json({ error: 'Invalid emailjs credentials' });
 
-                if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+            }
 
-                    return Response.json({ error: 'Invalid emailjs credentials' });
-
-                }
-
-                const body = `Hello ${name},<br>
+            const body = `Hello ${name},<br>
 Your one-time verification code is:
 <h2 style="font-weight:bold">${otp}</h2>
 This code will expire in 5 minutes.`;
 
-                const subject = `Welcome to MiniHelp`
+            const subject = `Welcome to MiniHire`
 
-                const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+            const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
 
-                    body,
-                    subject,
-                    email
+                body,
+                subject,
+                email
 
-                }, {
-                    publicKey: process.env.EMAILJS_PUBLICKEY,
-                    privateKey: process.env.EMAILJS_PRIVATEKEY
-                })
+            }, {
+                publicKey: process.env.EMAILJS_PUBLICKEY,
+                privateKey: process.env.EMAILJS_PRIVATEKEY
+            })
 
-                if (res.status != 200) {
+            if (res.status != 200) {
 
-                    return Response.json({ message: 'OTP not sent' });
+                return Response.json({ message: 'OTP not sent' });
 
-                }
+            }
 
+            if (newCompany) {
                 return Response.json({ message: `OTP sent to ${email}` });
             }
 
@@ -239,6 +239,12 @@ This code will expire in 5 minutes.`;
 
             if (!user) {
 
+                user = await Admin.findOne({ email: email.toLowerCase() })
+
+            }
+
+            if (!user) {
+
                 return Response.json({ message: `Sign Up First` });
 
             }
@@ -249,6 +255,11 @@ This code will expire in 5 minutes.`;
 
                 return Response.json({ message: `Wrong Password` });
 
+            }
+
+            // Check if company is verified
+            if (user.role === 'company' && !user.verified) {
+                return Response.json({ message: 'Account pending verification' });
             }
 
             if (!process.env.JWT_SECRET) {
@@ -292,6 +303,9 @@ export async function GET(req: Request) {
     const id = searchParams.get("id");
     const email = searchParams.get("email");
     const email_toApply = searchParams.get("toApply");
+    const operation = searchParams.get("operation");
+    const approve = searchParams.get("approve");
+    const unapprove = searchParams.get("unapprove");
 
     if (id) {
 
@@ -330,6 +344,33 @@ export async function GET(req: Request) {
         }
 
         return Response.json(student);
+
+    } else if (operation == "all") {
+
+        try {
+            const companies = await Company.find({}).select('-password -otp -expires');
+            return Response.json(companies);
+        } catch (err) {
+            return Response.json({ error: 'Failed to fetch companies' }, { status: 500 });
+        }
+
+    } else if (approve) {
+
+        try {
+            await Company.findByIdAndUpdate(approve, { verified: true });
+            return Response.json({ message: 'Company approved' });
+        } catch (err) {
+            return Response.json({ error: 'Failed to approve company' }, { status: 500 });
+        }
+
+    } else if (unapprove) {
+
+        try {
+            await Company.findByIdAndUpdate(unapprove, { verified: false });
+            return Response.json({ message: 'Company unapproved' });
+        } catch (err) {
+            return Response.json({ error: 'Failed to unapprove company' }, { status: 500 });
+        }
 
     }
 

@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     user.otp = undefined;
     user.expires = undefined;
-    user.verified = true;
+    user.verified = role === 'student' ? true : false;
     await user.save();
 
     return Response.json({ message: 'Verified', user: user });
