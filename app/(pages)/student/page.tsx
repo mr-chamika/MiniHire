@@ -124,7 +124,7 @@ export default function StudentSignup() {
 
         } catch (err) {
 
-            console.log('Error from load profile page: ' + error);
+            console.log('Error from load profile page: ' + err);
 
         }
     };
