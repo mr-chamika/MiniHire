@@ -357,7 +357,37 @@ export async function GET(req: Request) {
     } else if (approve) {
 
         try {
-            await Company.findByIdAndUpdate(approve, { verified: true });
+            const company = await Company.findByIdAndUpdate(approve, { verified: true });
+
+            if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+
+                return Response.json({ error: 'Invalid emailjs credentials' });
+
+            }
+
+            const body = `Hello ${company.companyName},<br>
+Your Account has been verified. You can post your internship vacancies.<br>
+Thank you for choosing MiniHire.`;
+
+            const subject = `Welcome to MiniHire`
+
+            const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+
+                body,
+                subject,
+                email: company.email
+
+            }, {
+                publicKey: process.env.EMAILJS_PUBLICKEY,
+                privateKey: process.env.EMAILJS_PRIVATEKEY
+            })
+
+            if (res.status != 200) {
+
+                return Response.json({ message: 'Email not sent' });
+
+            }
+
             return Response.json({ message: 'Company approved' });
         } catch (err) {
             return Response.json({ error: 'Failed to approve company' }, { status: 500 });
@@ -366,7 +396,37 @@ export async function GET(req: Request) {
     } else if (unapprove) {
 
         try {
-            await Company.findByIdAndUpdate(unapprove, { verified: false });
+            const company = await Company.findByIdAndUpdate(unapprove, { verified: false });
+
+            if (!process.env.EMAILJS_SERVICEID || !process.env.EMAILJS_TEMPLATEID || !process.env.EMAILJS_PUBLICKEY || !process.env.EMAILJS_PRIVATEKEY) {
+
+                return Response.json({ error: 'Invalid emailjs credentials' });
+
+            }
+
+            const body = `Hello ${company.companyName},<br>
+Your Account has been banned. Your qualifications not satisfied with our guidelines.<br>
+Thank you.`;
+
+            const subject = `Welcome to MiniHire`
+
+            const res = await emailjs.send(process.env.EMAILJS_SERVICEID, process.env.EMAILJS_TEMPLATEID, {
+
+                body,
+                subject,
+                email: company.email
+
+            }, {
+                publicKey: process.env.EMAILJS_PUBLICKEY,
+                privateKey: process.env.EMAILJS_PRIVATEKEY
+            })
+
+            if (res.status != 200) {
+
+                return Response.json({ message: 'Email not sent' });
+
+            }
+
             return Response.json({ message: 'Company unapproved' });
         } catch (err) {
             return Response.json({ error: 'Failed to unapprove company' }, { status: 500 });
