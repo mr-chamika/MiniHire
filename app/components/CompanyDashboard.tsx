@@ -386,7 +386,6 @@ The interview details, including the scheduled time and meeting link, are provid
                 }
 
                 setShortList(data);
-                console.log(data)
 
             } catch (err) {
 
@@ -705,7 +704,7 @@ The interview details, including the scheduled time and meeting link, are provid
 
             }
 
-            setData({ ...res.data._doc, jd: res.data.jd, address: res.data.address, role: res.data.role, type: res.data.type })
+            setData({ ...res.data._doc, jd: res.data.jd, address: res.data.address, role: res.data.role, type: res.data.type, period: res.data.period })
 
             setLetter(`
 We are pleased to inform you that you have been selected for the ${res.data.role} Internship at ${res.data.companyName}. After careful review of your application and interview, we were impressed 
@@ -769,6 +768,7 @@ Further details regarding onboarding, reporting structure, and required document
                 setShowInvite(false)
                 setInviteDate(getMinDate)
                 setInviteTime(getMinTimeForDate())
+                setMailLoading(false);
             }
 
         } catch (err) {
@@ -931,7 +931,7 @@ Further details regarding onboarding, reporting structure, and required document
                         <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter2 == 'SE' ? 'border-yellow-400' : filter2 == 'QA' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
-                            <option value="SE">SE {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['SE'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
+                            <option value="SE">SE {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['SE', 'CS'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
                             <option value="QA">QA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['QA'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
                             <option value="BA">BA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['BA'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
 
@@ -939,7 +939,7 @@ Further details regarding onboarding, reporting structure, and required document
                     </div>
 
                     <div className="w-full h-[73vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
-                        {shortlist?.filter((app) => [filter2].includes(app.degree.split(" ")[0])).length == 0 ?
+                        {shortlist?.filter((app) => [filter2, "CS"].includes(app.degree.split(" ")[0])).length == 0 ?
 
                             <div className="h-full w-full flex justify-center items-center">
 
@@ -949,7 +949,7 @@ Further details regarding onboarding, reporting structure, and required document
                             :
                             <div>
 
-                                {shortlist?.filter((app) => [filter2].includes(app.degree.split(" ")[0])).map((application) => {
+                                {shortlist?.filter((app) => [filter2, "CS"].includes(app.degree.split(" ")[0])).map((application) => {
 
                                     return (
 

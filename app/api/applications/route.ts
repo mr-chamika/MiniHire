@@ -293,7 +293,7 @@ export async function GET(req: Request) {
     } else if (id) {
 
         //let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
-        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email period");
+        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email");
 
         if (!application) {
 
@@ -303,7 +303,7 @@ export async function GET(req: Request) {
 
         const post = await Post.findOne({ _id: application.post_id });
 
-        const returnObj = { ...application, jd: post.jd, address: post.companyAddress, companyName: post.companyName, role: post.role, type: post.type }
+        const returnObj = { ...application, jd: post.jd, address: post.companyAddress, companyName: post.companyName, role: post.role, type: post.type, period: post.period }
 
         return Response.json(returnObj);
 
@@ -433,7 +433,7 @@ export async function PUT(req: Request) {
         }
 
 
-        if (review == "rejected" && application.status == 'recruited') {
+        if (review == "rejected" && (application.status == 'recruited' || application.status == 'interviewed')) {
 
             const post = await Post.findOne({ _id: application.post_id });
 
