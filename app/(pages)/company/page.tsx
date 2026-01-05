@@ -36,6 +36,7 @@ export default function CompanySignup() {
     const [portfolio, setPortfolio] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState('');
+    const [errorF, setErrorF] = useState('');
     const [errorE, setErrorE] = useState('');
     const [errorCP, setErrorCP] = useState('');
     const [modal, setModal] = useState(false);
@@ -128,6 +129,13 @@ export default function CompanySignup() {
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
+
+        if (error || errorCP || errorE || errorF) {
+
+            return;
+
+        }
+
         setLoading(true);
 
         try {
@@ -157,6 +165,7 @@ export default function CompanySignup() {
 
                 setError('');
                 setErrorCP('');
+                setErrorF('');
 
                 const formData = new FormData();
 
@@ -316,8 +325,13 @@ export default function CompanySignup() {
                             <div className="w-full flex flex-col pb-2">
 
                                 <label className="text-lg text-gray-500">Company Logo</label>
-                                <input required type="file" accept="image/jpeg" onChange={(e) => { e.target.files && e.target.files.length > 0 && setFile(e.target.files[0]) }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-
+                                <input required type="file" accept="image/jpeg" onChange={(e) => {
+                                    const selectedFile = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+                                    if (selectedFile && selectedFile.type !== 'image/jpeg') { setErrorF('Only JPEG files are allowed.'); setLoading(false); setFile(null); } else { setFile(selectedFile); setErrorF(''); }
+                                }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                <div className="w-full h-2">
+                                    <span className={` text-red-400 text-sm italic ${errorF === '' ? 'opacity-0' : 'opacity-100'}`}>{errorF}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
