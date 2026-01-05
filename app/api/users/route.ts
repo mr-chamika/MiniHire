@@ -334,3 +334,58 @@ export async function GET(req: Request) {
     }
 
 }
+
+export async function PUT(req: Request) {
+    try {
+        await Database();
+        const formData = await req.formData();
+        const id = formData.get("id") as string;
+
+        if (!id) {
+            return Response.json({ error: 'ID required' });
+        }
+
+        const student = await Student.findById(id);
+        if (student) {
+            // Update student
+            if (formData.has("firstName")) student.firstName = formData.get("firstName") as string;
+            if (formData.has("lastName")) student.lastName = formData.get("lastName") as string;
+            if (formData.has("contactNumber")) student.contactNumber = formData.get("contactNumber") as string;
+            if (formData.has("linkedin")) student.linkedin = formData.get("linkedin") as string;
+            if (formData.has("portfolio")) student.portfolio = formData.get("portfolio") as string;
+            if (formData.has("github")) student.github = formData.get("github") as string;
+            if (formData.has("degree")) student.degree = formData.get("degree") as string;
+            if (formData.has("university")) student.university = formData.get("university") as string;
+            if (formData.has("resume")) {
+                const resumeFile = formData.get("resume") as File;
+                const buffer = Buffer.from(await resumeFile.arrayBuffer());
+                const blob = await put(resumeFile.name, buffer, { access: 'public', addRandomSuffix: true, contentType: resumeFile.type });
+                student.resume = blob.url;
+            }
+            await student.save();
+            return Response.json({ message: 'Student profile updated' });
+        }
+
+        const company = await Company.findById(id);
+        if (company) {
+            // Update company
+            if (formData.has("name")) company.name = formData.get("name") as string;
+            if (formData.has("contactNumber")) company.contactNumber = formData.get("contactNumber") as string;
+            if (formData.has("linkedin")) company.linkedin = formData.get("linkedin") as string;
+            if (formData.has("website")) company.website = formData.get("website") as string;
+            if (formData.has("logo")) {
+                const logoFile = formData.get("logo") as File;
+                const buffer = Buffer.from(await logoFile.arrayBuffer());
+                const blob = await put(logoFile.name, buffer, { access: 'public', addRandomSuffix: true, contentType: logoFile.type });
+                company.logo = blob.url;
+            }
+            await company.save();
+            return Response.json({ message: 'Company profile updated' });
+        }
+
+        return Response.json({ error: 'User not found' });
+    } catch (err) {
+        console.error('Error updating profile:', err);
+        return Response.json({ error: 'Failed to update profile' });
+    }
+}

@@ -33,6 +33,7 @@ interface Post {
     period: string;
     description: string,
     country: string;
+    status: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -138,6 +139,19 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [showInvite, setShowInvite] = useState(false);//to display pop up to customize interview invitation email.
     const [sendSelected, setSendSelected] = useState(false);//to display pop up to send selected email.
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [mailLoading, setMailLoading] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentPostId, setCurrentPostId] = useState('');
+    const [originalData, setOriginalData] = useState({
+        address: '',
+        creator: '',
+        role: roles[0].value,
+        type: types[0].value,
+        period: periods[0].value,
+        vacancies: 1,
+        desc: ''
+    });
 
     //set states for invitation email to student
 
@@ -155,8 +169,6 @@ The interview details, including the scheduled time and meeting link, are provid
         const yr = today.getFullYear();
         const month = today.getMonth() > 9 ? (today.getMonth() + 1).toString() : '0' + (today.getMonth() + 1).toString();
         const day = today.getDate() > 9 ? (today.getDate()).toString() : '0' + (today.getDate()).toString();
-
-        console.log(`${yr}-${month}-${day}`)
 
         return `${yr}-${month}-${day}`;
 
@@ -374,7 +386,6 @@ The interview details, including the scheduled time and meeting link, are provid
                 }
 
                 setShortList(data);
-                console.log(data)
 
             } catch (err) {
 
@@ -396,59 +407,102 @@ The interview details, including the scheduled time and meeting link, are provid
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
-
+        setLoading(true);
         try {
 
-            if (!jd) { alert('please upload your job description....'); return; }
+            if (isEditing) {
+                // Update logic
+                const formData = new FormData();
+                formData.append("action", "update");
+                formData.append("_id", currentPostId);
+                formData.append("companyAddress", address);
+                formData.append("creatorName", creator);
+                formData.append("role", role);
+                formData.append("type", type);
+                formData.append("period", period);
+                formData.append("vacancies", vacancies.toString());
+                formData.append("description", desc);
 
-            const tokenString = localStorage.getItem("token");
+                if (jd) {
 
-            if (!tokenString) { alert('Token not found. Try again..'); return; }
+                    formData.append("jd", jd);
 
-            const token: Token = jwtDecode(tokenString);
+                }
 
-            const formData = new FormData();
+                const res = await axios.put('/api/posts', formData);
+                if (res.status !== 200) {
+                    alert('Check your internet connection');
+                    return;
+                }
+                if (res.data.message) {
+                    alert(res.data.message);
+                }
+                setModal(false);
+                setIsEditing(false);
+                setCurrentPostId('');
+                setJd(null);
+                setJdCompany("");
+                setLoad(!load);
+            } else {
 
-            formData.append("createdBy", token.userId);
-            formData.append("companyName", companyName);
-            formData.append("contactNumber", contact);
-            formData.append("companyAddress", address);
-            formData.append("creatorName", creator);
-            formData.append("vacancies", vacancies.toString());
-            formData.append("role", role);
-            formData.append("type", type);
-            formData.append("period", period);
-            formData.append("jd", jd);
-            formData.append("description", desc);
 
-            const res = await axios.post('/api/posts', formData)
+                if (!jd) { alert('please upload your job description....'); return; }
 
-            if (res.status != 200) {
+                const tokenString = localStorage.getItem("token");
 
-                alert('Check your internet connection');
-                return;
+                if (!tokenString) { alert('Token not found. Try again..'); return; }
+
+                const token: Token = jwtDecode(tokenString);
+
+                const formData = new FormData();
+
+                formData.append("createdBy", token.userId);
+                formData.append("companyName", companyName);
+                formData.append("contactNumber", contact);
+                formData.append("companyAddress", address);
+                formData.append("creatorName", creator);
+                formData.append("vacancies", vacancies.toString());
+                formData.append("role", role);
+                formData.append("type", type);
+                formData.append("period", period);
+                formData.append("jd", jd);
+                formData.append("description", desc);
+
+                const res = await axios.post('/api/posts', formData)
+                console.log('hell1');
+
+                if (res.status != 200) {
+
+                    alert('Check your internet connection');
+                    return;
+
+                }
+
+                if (res.data.message) {
+
+                    alert(res.data.message);
+
+                }
+
+                setModal(false);
+                setAddress('');
+                setCreator('');
+                setRole(roles[0].value);
+                setType(types[0].value);
+                setPeriod(periods[0].value);
+                setJd(null);
+                setVacancies(1);
+                setDesc('');
 
             }
-
-            if (res.data.message) {
-
-                alert(res.data.message);
-
-            }
-
-            setModal(false);
-            setAddress('');
-            setCreator('');
-            setRole(roles[0].value);
-            setType(types[0].value);
-            setPeriod(periods[0].value);
-            setJd(null);
-            setVacancies(1);
-            setDesc('');
-
         } catch (err) {
 
+            setLoading(false);
             alert('Creating Job Post Failed.');
+
+        } finally {
+
+            setLoading(false);
 
         }
     }
@@ -650,7 +704,7 @@ The interview details, including the scheduled time and meeting link, are provid
 
             }
 
-            setData({ ...res.data._doc, jd: res.data.jd, address: res.data.address, role: res.data.role, type: res.data.type })
+            setData({ ...res.data._doc, jd: res.data.jd, address: res.data.address, role: res.data.role, type: res.data.type, period: res.data.period })
 
             setLetter(`
 We are pleased to inform you that you have been selected for the ${res.data.role} Internship at ${res.data.companyName}. After careful review of your application and interview, we were impressed 
@@ -675,6 +729,7 @@ Further details regarding onboarding, reporting structure, and required document
     const handleSubmitEmail = async (e: any) => {
 
         e.preventDefault();
+        setMailLoading(true);
 
         if (error) return;
 
@@ -694,6 +749,7 @@ Further details regarding onboarding, reporting structure, and required document
 
             if (res.status != 200) {
 
+                setMailLoading(false);
                 alert('Check your internet connection');
                 return;
 
@@ -712,10 +768,12 @@ Further details regarding onboarding, reporting structure, and required document
                 setShowInvite(false)
                 setInviteDate(getMinDate)
                 setInviteTime(getMinTimeForDate())
+                setMailLoading(false);
             }
 
         } catch (err) {
 
+            setMailLoading(false);
             console.log("Error sending email: " + err);
             alert("Check your internet connection...")
             return;
@@ -779,6 +837,80 @@ Further details regarding onboarding, reporting structure, and required document
 
     }
 
+    const editing = async (id: string) => {
+
+        const post = myPosts?.find(p => p._id === id);
+        if (post) {
+            setAddress(post.companyAddress);
+            setCreator(post.creatorName);
+            setRole(post.role);
+            setType(post.type);
+            setPeriod(post.period);
+            setVacancies(Number(post.vacancies));
+            setDesc(post.description);
+            setOriginalData({
+                address: post.companyAddress,
+                creator: post.creatorName,
+                role: post.role,
+                type: post.type,
+                period: post.period,
+                vacancies: Number(post.vacancies),
+                desc: post.description
+            });
+
+            try {
+                const encoded = encodeURIComponent(id);
+                const res = await axios.get(`/api/posts?id=${encoded}`);
+                if (res.status === 200) {
+
+                    setJdCompany(res.data.jd.split("/").pop())
+                }
+            } catch (err) {
+                console.error("Error fetching JD:", err);
+            }
+
+            setCurrentPostId(id);
+            setIsEditing(true);
+            setModal(true);
+        }
+    };
+
+    const hasChanged = () => {
+        return address !== originalData.address ||
+            creator !== originalData.creator ||
+            role !== originalData.role ||
+            type !== originalData.type ||
+            period !== originalData.period ||
+            vacancies !== originalData.vacancies ||
+            desc !== originalData.desc ||
+            jd !== null;
+    };
+
+    const hiding = async (id: string) => {
+
+        const formData = new FormData();
+        formData.append("action", "toggle_hide");
+        formData.append("_id", id);
+
+        try {
+            const res = await axios.put('/api/posts', formData);
+            if (res.status === 200) {
+
+                if (res.data.message) {
+
+                    alert(res.data.message);
+
+                }
+                setLoad(!load);
+            } else {
+                alert('Error toggling status');
+            }
+        } catch (err) {
+            alert('Error: ' + err);
+        }
+
+    }
+
     return (
 
         <div className="w-full flex flex-col min-w-[400px]">
@@ -795,11 +927,11 @@ Further details regarding onboarding, reporting structure, and required document
                 {/* shortlisted student list */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                     <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => ["selected", "interviewed", "recruited"].includes(app.status)).length + ')' : ''}</p>
-                        <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => ["selected", "interviewed", "recruited", "hired"].includes(app.status)).length + ')' : ''}</p>
+                        <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter2 == 'SE' ? 'border-yellow-400' : filter2 == 'QA' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
-                            <option value="SE">SE {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['SE'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
+                            <option value="SE">SE {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['SE', 'CS'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
                             <option value="QA">QA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['QA'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
                             <option value="BA">BA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['BA'].includes(app.degree.split(" ")[0])).length + ')' : ''}</option>
 
@@ -807,7 +939,7 @@ Further details regarding onboarding, reporting structure, and required document
                     </div>
 
                     <div className="w-full h-[73vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
-                        {shortlist?.filter((app) => [filter2].includes(app.degree.split(" ")[0])).length == 0 ?
+                        {shortlist?.filter((app) => [filter2, "CS"].includes(app.degree.split(" ")[0])).length == 0 ?
 
                             <div className="h-full w-full flex justify-center items-center">
 
@@ -817,7 +949,7 @@ Further details regarding onboarding, reporting structure, and required document
                             :
                             <div>
 
-                                {shortlist?.filter((app) => [filter2].includes(app.degree.split(" ")[0])).map((application) => {
+                                {shortlist?.filter((app) => [filter2, "CS"].includes(app.degree.split(" ")[0])).map((application) => {
 
                                     return (
 
@@ -883,6 +1015,9 @@ Further details regarding onboarding, reporting structure, and required document
                                             vacancies={post.vacancies.toString()}
                                             creatorName={post.creatorName}
                                             createdAt={post.createdAt}
+                                            editing={() => editing(post._id)}
+                                            hiding={() => hiding(post._id)}
+                                            isHidden={post.status}
 
                                         />
 
@@ -899,7 +1034,7 @@ Further details regarding onboarding, reporting structure, and required document
                 {/* applications list received by students */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                     <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.length > 0 ? '(' + applications.filter(app => !["selected", "interviewed", "recruited"].includes(app.status)).length + ')' : ''}</p>
+                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.length > 0 ? '(' + applications.filter(app => !["selected", "interviewed", "recruited", "hired"].includes(app.status)).length + ')' : ''}</p>
                         <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
@@ -956,7 +1091,7 @@ Further details regarding onboarding, reporting structure, and required document
 
             {modal &&
 
-                <Modal show={modal} setShow={setModal}>
+                <Modal show={modal} setShow={(show) => { setModal(show); if (!show) { setIsEditing(false); setCurrentPostId(''); setAddress(''); setCreator(''); setRole(roles[0].value); setType(types[0].value); setPeriod(periods[0].value); setJd(null); setJdCompany(""); setDesc(''); } }}>
                     <div className="justify-center items-center flex h-[90vh]">
                         <form onSubmit={handleSubmit} className="w-[72%] shadow-xl px-10 py-10 rounded-lg flex flex-col justify-between items-center bg-gray-50">
                             <div className=" gap-5 flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full">
@@ -1030,7 +1165,16 @@ Further details regarding onboarding, reporting structure, and required document
                                     <div className="w-full flex flex-col pb-2">
 
                                         <label className="text-lg text-gray-500">Job Description</label>
-                                        <input required type="file" accept="image/jpeg" onChange={(e) => { e.target.files && e.target.files.length > 0 && setJd(e.target.files[0]) }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                        <div className="flex items-center border border-blue-200 rounded-lg bg-blue-100 px-2 py-1 w-full">
+                                            <input type="file" id="jdFile" hidden accept="image/jpeg" onChange={(e) => {
+                                                if (e.target.files && e.target.files.length > 0) {
+                                                    setJd(e.target.files[0]);
+                                                    setJdCompany(e.target.files[0].name)
+                                                }
+                                            }} />
+                                            <label htmlFor="jdFile" className="cursor-pointer bg-gray-200 text-blue-500 font-bold rounded-md px-2 py-1 shadow-sm mr-2">Choose File</label>
+                                            <span className="text-gray-500 flex-1">{(jdCompany.length > 40 ? jdCompany.slice(0, 40) + "..." : jdCompany) || "No File Choosen"}</span>
+                                        </div>
 
                                     </div>
 
@@ -1042,7 +1186,7 @@ Further details regarding onboarding, reporting structure, and required document
                                     </div>
                                 </div>
                             </div>
-                            <input type="submit" value='Create Job Post' className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 mt-8 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+                            <input type="submit" disabled={loading || (isEditing && !hasChanged())} value={loading ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Job Post' : 'Create Job Post')} className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 mt-8 rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black disabled:opacity-50" />
 
                         </form>
                     </div>
@@ -1095,7 +1239,7 @@ Further details regarding onboarding, reporting structure, and required document
                                     <textarea rows={10} required value={invite} onChange={(e) => setInvite(e.target.value)} className="outline-none  rounded-lg px-4 py-1 bg-blue-100 border border-blue-200 w-full resize-none text-justify" />
                                 </div>
                             </div>
-                            <input type="submit" value='Send Email' className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+                            <input type="submit" value={mailLoading ? 'Sending email...' : 'Send Email'} disabled={mailLoading} className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black disabled:opacity-50" />
 
                         </form>
                     </div>
@@ -1165,7 +1309,7 @@ Further details regarding onboarding, reporting structure, and required document
                                 {(jdCompany?.endsWith('.jpg') || jdCompany?.endsWith('.jpeg')) &&
                                     <div className="flex w-full justify-center h-full">
                                         <div className="flex h-full">
-                                            <Image src={jdCompany} alt="Your Logo" height={600} width={600} className="h-[41vh] sm:h-[80vh]" />
+                                            <Image src={jdCompany} alt="Job Description" height={600} width={600} className="h-[41vh] sm:h-[80vh]" />
                                         </div>
                                     </div>}
                             </div>

@@ -18,18 +18,29 @@ export default function Home() {
 
     if (tokenString) {//if token exists navigate to dashboard
 
-      const token = jwtDecode(tokenString);
+      try {
 
-      if (token.exp && token.exp * 1000 < Date.now()) {
+        const token = jwtDecode(tokenString);
 
+        if (token.exp && token.exp * 1000 < Date.now()) {
+
+          localStorage.removeItem("token");
+          router.push('/login');
+          return;
+
+        }
+
+        router.push('/dashboard');
+        return;
+
+      } catch (err) {
+
+        console.log("Invalid Token : ", err);
         localStorage.removeItem("token");
         router.push('/login');
         return;
 
       }
-
-      router.push('/dashboard');
-      return;
 
     } else {//if token expired navigate to landing page
 

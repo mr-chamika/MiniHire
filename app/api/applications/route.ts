@@ -178,14 +178,6 @@ We congratulate you on your selection and look forward to welcoming you.
 
             application.status = "recruited";
 
-            if (post.vacancies > post.recruited) {
-
-                post.recruited = post.recruited + 1;
-
-                post.save()
-
-            }
-
             application.save()
 
             return Response.json({ done: 'true' });
@@ -301,7 +293,7 @@ export async function GET(req: Request) {
     } else if (id) {
 
         //let application = await Application.findOne({ _id: id, $expr: { $ne: ["$status", 'cancelled'] } }, "firstName lastName university degree portfolio linkedin resume post_id");
-        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email period");
+        let application = await Application.findOne({ _id: id }, "firstName lastName university degree portfolio linkedin resume post_id status marks email");
 
         if (!application) {
 
@@ -311,7 +303,7 @@ export async function GET(req: Request) {
 
         const post = await Post.findOne({ _id: application.post_id });
 
-        const returnObj = { ...application, jd: post.jd, address: post.companyAddress, companyName: post.companyName, role: post.role, type: post.type }
+        const returnObj = { ...application, jd: post.jd, address: post.companyAddress, companyName: post.companyName, role: post.role, type: post.type, period: post.period }
 
         return Response.json(returnObj);
 
@@ -334,7 +326,7 @@ export async function GET(req: Request) {
         }
 
 
-        const applications = await Application.find({ status: { $in: ["selected", "interviewed", "recruited"] }, post_id: { $in: posts } });
+        const applications = await Application.find({ status: { $in: ["selected", "interviewed", "recruited", "hired"] }, post_id: { $in: posts } });
 
         if (!applications) {
 
@@ -406,13 +398,17 @@ export async function PUT(req: Request) {
 
         const application = await Application.findOne({ _id: id });
 
-        if (application.status == 'selected') {//cv s that rejected by comapny or cancel by student after selected can not be reapply.
+        if (['selected', 'interviewed'].includes(application.status)) {//cv s that rejected by comapny or cancel by student after selected or interviewedncan not be reapply.
 
             application.status = "rejected";
 
             const student = await Student.findOne({ email: application.email })
 
-            student.saved.pull(application.post_id);
+            if (student.saved.includes(application.post_id)) {
+
+                student.saved.pull(application.post_id);
+
+            }
 
             await student.save();
 
@@ -436,20 +432,34 @@ export async function PUT(req: Request) {
 
         }
 
-        application.status = review;
 
-        if (review == "rejected" && application.status == 'recruited') {
+        if (review == "rejected" && (application.status == 'recruited' || application.status == 'interviewed')) {
 
             const post = await Post.findOne({ _id: application.post_id });
 
-            if (post.recruited > 0) {
+            if (post && post.recruited > 0) {
 
                 post.recruited = post.recruited - 1;
                 post.save();
 
             }
 
+        } else if (review == "hired" && application.status == 'recruited') {
+
+            const post = await Post.findOne({ _id: application.post_id });
+
+            if (post.vacancies > post.recruited) {
+
+                post.recruited = post.recruited + 1;
+
+                post.save()
+
+            }
+
+
         }
+
+        application.status = review;
 
         application.save();
 

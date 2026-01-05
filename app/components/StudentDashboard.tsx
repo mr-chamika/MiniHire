@@ -42,6 +42,7 @@ interface Form {
     post_id: string;
     contactNumber: string;
     github: string;
+    _idx: string;
 
 }
 interface Application {
@@ -72,6 +73,7 @@ export default function StudentDashboard({ email }: { email: string }) {
     const [isProceeding, setIsproceeding] = useState(false);
     const [inResume, setInResume] = useState(false);
     const [hide, setHide] = useState(false);
+    const [confirming, setConfirming] = useState(false);
     const [filter, setFilter] = useState("pending");
 
     //for application form
@@ -87,13 +89,14 @@ export default function StudentDashboard({ email }: { email: string }) {
             resume: '',
             post_id: '',
             contactNumber: '',
-            github: ''
+            github: '',
+            _idx: ''//clicked application's _id
         }
     );
 
     const toApply = async (id: string, x = "") => {//use of Apply button
 
-        await showJD(id, x);
+        await showJD("", id, x);
         await proceed();
 
     }
@@ -119,7 +122,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                 return;
 
             }
-            setData(prev => ({ ...res.data, post_id: prev.post_id }))
+            setData(prev => ({ ...res.data, post_id: prev.post_id, _idx: prev._idx }))
             setIsproceeding(true);
 
         } catch (err) {
@@ -190,10 +193,9 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }
 
-    const showJD = async (id: string, x = "") => {//to show the job description after click on the student post Card
+    const showJD = async (app_id = "", id: string, x = "") => {//to show the job description after click on the student post Card
 
         try {
-
 
             const encoded = encodeURIComponent(id);
 
@@ -219,11 +221,13 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             }
 
-            if (["pending", "selected"].includes(x)) { proceed() }
-            if (["rejected", "selected", "pending"].includes(x)) { setHide(true) }
+            if (["pending", "selected", "recruited", "interviewed"].includes(x)) { proceed() }
+            if (["rejected", "selected", "pending", "recruited", "interviewed", "hired"].includes(x)) { setHide(true) }
+
+            if (x == 'recruited') { setConfirming(true) }
 
             setJd(res.data.jd);
-            setData(prev => ({ ...prev, post_id: id }))
+            setData(prev => ({ ...prev, post_id: id, _idx: app_id }))
             setShowJd(true);
 
         } catch (err) {
@@ -235,6 +239,60 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }
 
+    const close = async () => {
+
+        setShowJd(false);
+        setHide(false);
+        setConfirming(false);
+        setData({ firstName: '', lastName: '', university: '', degree: '', portfolio: '', linkedin: '', resume: '', post_id: '', contactNumber: '', github: '', _idx: '' })
+        setIsFav(!isFav)
+
+    }
+
+    const review = async (id = "", x: string) => {
+
+        try {
+            const encoded = encodeURIComponent(x);
+
+            const formData = new FormData();
+
+            formData.append("id", id);
+            formData.append("review", encoded);
+
+            const res = await axios.put('/api/applications', formData);
+
+            if (res.status != 200) {
+
+                alert('Check your connection');
+                return;
+
+            }
+
+            if (res.data.message) {
+
+                alert(res.data.message);
+                return;
+
+            }
+
+            if (res.data.done == 'true') {
+
+                alert('Application Reviewed sucessfully.');
+                close();
+                setIsFav(!isFav);
+
+            }
+
+        } catch (err) {
+
+            alert("Failed to cancel sent application...");
+            close();
+            return;
+
+        }
+
+    }
+    console.log(data)
 
     const mark = async (id: string) => {//to mark a post as a favourite
 
@@ -451,7 +509,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         const x = applications?.find(app => app.post_id == id);
 
-        if (x && ["selected", "pending"].includes(x.status)) {
+        if (x && ["selected", "pending", "recruited", "interviewed", "hired"].includes(x.status)) {
 
             return true;
 
@@ -494,7 +552,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 description={post.description}
                                                 createdAt={post.createdAt}
                                                 mark={() => mark(post._id)}
-                                                showJd={() => showJD(post._id, isApplied(post._id) ? "rejected" : "")}
+                                                showJd={() => showJD("", post._id, isApplied(post._id) ? "rejected" : "")}
 
                                             />
 
@@ -539,7 +597,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 companyName={post.companyName}
                                                 mark={() => mark(post._id)}
                                                 saved={savedList}
-                                                showJd={() => showJD(post._id, isApplied(post._id) ? "rejected" : "")}
+                                                showJd={() => showJD("", post._id, isApplied(post._id) ? "rejected" : "")}
                                                 toApply={() => toApply(post._id, isApplied(post._id) ? "rejected" : "")}
                                                 isApplied={isApplied(post._id)}
 
@@ -565,6 +623,9 @@ export default function StudentDashboard({ email }: { email: string }) {
                                 <option value="pending">Pending {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'pending').length + ')' : ''}</option>
                                 <option value="rejected">Rejected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'rejected').length + ')' : ''}</option>
                                 <option value="cancelled">Cancelled {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'cancelled').length + ')' : ''}</option>
+                                <option value="recruited">Recruited {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'recruited').length + ')' : ''}</option>
+                                <option value="interviewed">Interviewed {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'interviewed').length + ')' : ''}</option>
+                                <option value="hired">Hired {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'hired').length + ')' : ''}</option>
 
                             </select>
                         </div>
@@ -594,7 +655,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                                 createdAt={application.createdAt}
                                                 contact={application.contactNumber}
                                                 period={application.period}
-                                                showJd={() => showJD(application.post_id, application.status)}
+                                                showJd={() => showJD(application._id, application.post_id, application.status)}
                                                 cancel={() => cancel(application._id)}
 
                                             />
@@ -618,12 +679,12 @@ export default function StudentDashboard({ email }: { email: string }) {
                 <Modal show={showJd} setShow={closeSubmission}>
                     <div className={`py-2 scroll-smooth overflow-y-auto max-h-[90vh] flex flex-col items-center scrollbar-thin scrollbar-hide`}>
                         <div className="w-full h-[85vh]">
-                            {(jd?.endsWith('.jpg') || jd?.endsWith('.jpeg')) &&
+                            {(jd?.endsWith('.jpg') || jd?.endsWith('.jpeg')) ?
                                 <div className="flex justify-center items-center w-full">
                                     <div className="flex items-center justify-center w-[80%] h-[80%]">
                                         <Image src={jd} alt="Your Logo" width={440} height={100} />
                                     </div>
-                                </div>}
+                                </div> : <div>Loading...</div>}
                         </div>
 
                         {isProceeding &&
@@ -690,6 +751,13 @@ export default function StudentDashboard({ email }: { email: string }) {
                         }
 
                         {!hide && <div onClick={isProceeding ? handleSubmit : proceed} className="w-[50%] sm:w-[38%] py-2 flex justify-center items-center text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">{isProceeding ? 'Submit' : 'Proceed'}</div>}
+                        {confirming && <div className="flex flex-row sm:w-[40%] w-[50%] gap-3 sm:gap-6 items-center">
+                            <div onClick={() => review(data._idx, "hired")} className="w-[45%] sm:w-[50%] flex justify-center items-center h-9 text-lg font-bold bg-green-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-green-300 hover:bg-transparent shadow-black">Confirm</div>
+                            <div onClick={() => review(data._idx, "rejected")} className="w-[45%] sm:w-[50%] h-9  flex justify-center items-center text-lg font-bold bg-red-400 rounded-lg hover:cursor-pointer hover:text-white hover:border-2 border-red-300 hover:bg-transparent shadow-black">Reject</div>
+                        </div>
+
+
+                        }
                     </div>
                 </Modal>
             }
