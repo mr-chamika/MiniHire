@@ -26,6 +26,7 @@ export default function AuthTopbarLogged() {
     const [modal, setModal] = useState(false);
     const [toLanding, setToLanding] = useState(false);
     const [name, setName] = useState('');
+    const [role, setRole] = useState('');
 
     useEffect(() => {
 
@@ -36,6 +37,8 @@ export default function AuthTopbarLogged() {
         const token: Token = jwtDecode(tokenString);
 
         setName(token.name);
+
+        setRole(token.role);
 
     }, [])
 
@@ -84,7 +87,7 @@ export default function AuthTopbarLogged() {
 
                 <div className="flex items-center gap-4">
 
-                    <button className="hover:cursor-pointer bg-white rounded-full px-1 pt-1" onClick={toProfile}><Image className="rounded-full max-w-10 h-10" src={Profile} alt="Profile picture" /></button>
+                    {role != "admin" && <button className="hover:cursor-pointer bg-white rounded-full px-1 pt-1" onClick={toProfile}><Image className="rounded-full max-w-10 h-10" src={Profile} alt="Profile picture" /></button>}
                     <button className="bg-red-500 text-white font-bold px-3 pb-2 pt-1 rounded-md hover:cursor-pointer" onClick={() => setModal(true)}>Logout</button>
 
                 </div>

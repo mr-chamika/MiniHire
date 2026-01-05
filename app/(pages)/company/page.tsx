@@ -111,6 +111,13 @@ export default function CompanySignup() {
                 setOtp(Array(6).fill(""));
                 setModal(false);
 
+                if (role == "company") {
+
+                    router.replace('/login?message=Email%20verified,%20waiting%20for%20admin%20approval');
+                    return;
+
+                }
+
                 //router.replace(`/profile/${res.data.user._id}`);
                 router.replace(`/login`);
 
@@ -216,9 +223,10 @@ export default function CompanySignup() {
 
                 console.log('Signup Successed');
 
-                setRole(formData.get("role") as string);
-                setModal(true);
-
+                if (res.data.message === `OTP sent to ${email}`) {
+                    setRole("company");
+                    setModal(true);
+                }
             }
 
         } catch (err) {
