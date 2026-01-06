@@ -44,6 +44,7 @@ export default function CompanySignup() {
     const [message, setMessage] = useState("");
     const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
+    const [verifying, setVerifying] = useState(false);
 
     const confirmPw = (e: any) => {
 
@@ -98,6 +99,8 @@ export default function CompanySignup() {
                 return;
             }
 
+            setVerifying(true);
+
             const formData = new FormData();
 
             formData.append("email", email.toLowerCase());
@@ -122,11 +125,13 @@ export default function CompanySignup() {
                 router.replace(`/login`);
 
             } else {
+                setVerifying(false);
                 setMessage("❌ Invalid OTP. Please try again.");
             }
 
         } catch (err) {
 
+            setVerifying(false);
             console.log('Error from load profile page: ' + err);
 
         }
@@ -376,8 +381,9 @@ export default function CompanySignup() {
 
                             <input
                                 type="submit"
-                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
-                                value="Verify"
+                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition disabled:opacity-50"
+                                value={verifying ? "Verifying" : "Verify"}
+                                disabled={verifying}
                             />
 
                             {message && (

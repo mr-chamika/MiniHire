@@ -59,12 +59,15 @@ export default function StudentSignup() {
     const [error, setError] = useState('');
     const [errorCP, setErrorCP] = useState('');
     const [errorE, setErrorE] = useState('');
+    const [errorF, setErrorF] = useState('');
     const [modal, setModal] = useState(false);
     const [otp, setOtp] = useState(Array(6).fill(""));
     const [message, setMessage] = useState("");
     const [role, setRole] = useState("");
     const [contact, setContact] = useState("");
     const [loading, setLoading] = useState(false);
+    const [verifying, setVerifying] = useState(false);
+
 
     const handleChange = (value: string, index: number) => {
         if (/^[0-9]?$/.test(value)) {
@@ -101,6 +104,8 @@ export default function StudentSignup() {
                 return;
             }
 
+            setVerifying(true);
+
             const formData = new FormData();
 
             formData.append("email", email.toLowerCase());
@@ -119,11 +124,13 @@ export default function StudentSignup() {
                 router.replace(`/login`);
 
             } else {
+                setVerifying(false);
                 setMessage("❌ Invalid OTP. Please try again.");
             }
 
         } catch (err) {
 
+            setVerifying(false);
             console.log('Error from load profile page: ' + err);
 
         }
@@ -132,7 +139,13 @@ export default function StudentSignup() {
     const handleSubmit = async (e: any) => {
 
         e.preventDefault();
-        setLoading(true);
+
+        setError('');
+        setErrorE('');
+        setErrorF('');
+        setErrorCP('');
+
+
         try {
             if (email.trim().length !== 0 &&
                 firstName.trim().length !== 0 &&
@@ -157,10 +170,8 @@ export default function StudentSignup() {
 
                 }
 
-                setError('');
-                setErrorCP('');
-
                 const formData = new FormData();
+                setLoading(true);
 
                 formData.append("email", email.toLocaleLowerCase());
                 formData.append("contactNumber", contact);
@@ -236,7 +247,7 @@ export default function StudentSignup() {
                 <div className="w-full flex justify-center">
                     <h1 className='md:text-5xl text-3xl font-semibold'>Welcome to MiniHire</h1>
                 </div>
-                <form onSubmit={handleSubmit} className="min-w-[92%] shadow-xl px-10 pt-10 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
+                <form onSubmit={handleSubmit} className="min-w-[92%] shadow-xl px-10 pt-8 rounded-3xl flex flex-col justify-between items-center bg-gray-50">
                     <div className="gap-5 flex flex-col sm:flex-row space-x-0 sm:space-x-10 w-full ">
                         <div className="sm:w-[50%] space-y-5 min-w-[145px]">
                             <div className="w-full flex flex-col pb-2">
@@ -340,8 +351,10 @@ export default function StudentSignup() {
                             <div className="w-full flex flex-col">
 
                                 <label className="text-lg text-gray-500">Your Resume</label>
-                                <input required type="file" accept="application/pdf" onChange={(e) => { e.target.files && e.target.files.length > 0 && setFile(e.target.files[0]) }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
-
+                                <input required type="file" accept="application/pdf" onChange={(e) => { const selectedFile = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null; if (selectedFile && selectedFile.type !== 'application/pdf') { setErrorF('Only PDF files are allowed.'); setFile(null); } else { setFile(selectedFile); setErrorF(''); } }} className="file:border-none file:bg-transparent file:font-bold file:text-blue-500 file:bg-gray-200 file:rounded-md file:shadow-sm file:cursor-pointer outline-none  rounded-lg px-2 py-1 bg-blue-100 border border-blue-200 w-full" />
+                                <div className="w-full h-2">
+                                    <span className={`text-red-400 text-sm italic ${errorF === '' ? 'opacity-0' : 'opacity-100'}`}>{errorF}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -352,7 +365,7 @@ export default function StudentSignup() {
 
             {modal &&
 
-                <Modal show={modal} setShow={setModal}>
+                <Modal show={modal} setShow={(modal) => { setModal(modal); setVerifying(false); setLoading(false); }}>
 
                     <div className="w-full flex flex-col items-center justify-center min-h-screen">
                         <form
@@ -379,8 +392,9 @@ export default function StudentSignup() {
 
                             <input
                                 type="submit"
-                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
-                                value="Verify"
+                                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition disabled:opacity-50"
+                                value={verifying ? "Verifying" : "Verify"}
+                                disabled={verifying}
                             />
 
                             {message && (

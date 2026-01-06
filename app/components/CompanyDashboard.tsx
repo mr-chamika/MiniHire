@@ -141,6 +141,7 @@ export default function CompanyDashboard({ email }: { email: string }) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [mailLoading, setMailLoading] = useState(false);
+    const [selectedMailLoading, setSelectedMailLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentPostId, setCurrentPostId] = useState('');
     const [originalData, setOriginalData] = useState({
@@ -786,6 +787,7 @@ Further details regarding onboarding, reporting structure, and required document
         e.preventDefault();
 
         if (error) return;
+        setSelectedMailLoading(true);
 
         try {
 
@@ -819,6 +821,7 @@ Further details regarding onboarding, reporting structure, and required document
 
             if (res.data.done == 'true') {
 
+                setSelectedMailLoading(false);
                 alert('email sent');
                 setSendSelected(false)
                 setSelectedDate(getMinDate)
@@ -828,6 +831,7 @@ Further details regarding onboarding, reporting structure, and required document
 
         } catch (err) {
 
+            setSelectedMailLoading(false);
             console.log("Error sending email: " + err);
             alert("Check your internet connection...")
             return;
@@ -1293,7 +1297,7 @@ Further details regarding onboarding, reporting structure, and required document
                                     <textarea rows={10} required value={letter} onChange={(e) => setLetter(e.target.value)} className="outline-none  rounded-lg px-4 py-1 bg-blue-100 border border-blue-200 w-full resize-none text-justify" />
                                 </div>
                             </div>
-                            <input type="submit" value='Send Email' className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black" />
+                            <input type="submit" disabled={selectedMailLoading} value={selectedMailLoading ? 'Sending...' : 'Send Email'} className="outline-none bg-green-500 text-white sm:w-[40%] w-full py-1 my-2  rounded-xl hover:cursor-pointer hover:bg-green-300 hover:text-black disabled:opacity-50" />
 
                         </form>
                     </div>
