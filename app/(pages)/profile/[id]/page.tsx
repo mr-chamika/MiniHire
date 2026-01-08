@@ -1,5 +1,6 @@
 "use client"
 
+import Alert from "@/app/components/Alert";
 import Modal from "@/app/components/Modal";
 import axios from "axios";
 import Image from "next/image";
@@ -23,6 +24,15 @@ interface User {
     github?: string;
     website?: string;
     logo?: string;
+}
+
+interface Alert {
+
+    show: boolean;
+    close: () => void;
+    message: string;
+    type: 'success' | 'error';
+
 }
 
 export default function Profile({ params }: { params: Promise<{ id: string }> }) {
@@ -58,6 +68,7 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
+    const [isAlert, setIsAlert] = useState<Alert | null>(null);
 
     const degrees = [
         { label: "BSc Hons in Software Engineering", value: "SE (Hons)" },
@@ -130,7 +141,9 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
             }
             const res = await axios.put('/api/users', formData);
             if (res.status === 200) {
-                alert('Profile updated successfully');
+
+                setIsAlert({ show: true, close: close, message: "Profile updated successfully", type: "success" });
+
                 setEditModal(false);
                 setResumeFile(null);
                 setLogoFile(null);
@@ -140,10 +153,13 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
                 // Update original data to match new data
                 setOriginalData(editData);
             } else {
-                alert('Failed to update profile');
+                setIsAlert({ show: true, close: close, message: "Failed to update profile", type: "error" });
+                console.log('Failed to update profile');
+                return;
             }
         } catch (err) {
-            alert('Error updating profile');
+            setIsAlert({ show: true, close: close, message: "Failed to update profile", type: "error" });
+            console.log('Error updating profile');
         } finally {
             setLoading(false);
         }
@@ -201,7 +217,8 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
 
                 if (res.status != 200) {
 
-                    alert('Error');
+                    setIsAlert({ show: true, close: close, message: "Check your internet connection...", type: "error" });
+                    console.log('Error');
                     return;
 
                 }
@@ -454,6 +471,11 @@ export default function Profile({ params }: { params: Promise<{ id: string }> })
                     </div>
                 </Modal>
             )}
+            {isAlert?.show &&
+
+                <Alert show={isAlert.show} close={close} type={isAlert.type} message={isAlert.message} />
+
+            }
         </>
     );
 

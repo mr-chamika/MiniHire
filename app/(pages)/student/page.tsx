@@ -9,6 +9,16 @@ import Hide from '../../../public/assets/hidden.png'
 import Image from "next/image";
 import axios from "axios";
 import Modal from "@/app/components/Modal";
+import Alert from "@/app/components/Alert";
+
+interface Alert {
+
+    show: boolean;
+    close: () => void;
+    message: string;
+    type: 'success' | 'error';
+
+}
 
 export default function StudentSignup() {
 
@@ -67,6 +77,7 @@ export default function StudentSignup() {
     const [contact, setContact] = useState("");
     const [loading, setLoading] = useState(false);
     const [verifying, setVerifying] = useState(false);
+    const [isAlert, setIsAlert] = useState<Alert | null>(null);
 
 
     const handleChange = (value: string, index: number) => {
@@ -158,12 +169,15 @@ export default function StudentSignup() {
 
                 if (password.trim().length < 8) {
 
+                    setLoading(false);
                     setError('Minimum length is 8');
                     setErrorCP('')
                     return;
 
                 }
                 if (password.trim() !== confirmPassword.trim()) {
+
+                    setLoading(false);
                     setError('')
                     setErrorCP('Password must matches with above entered');
                     return;
@@ -204,8 +218,9 @@ export default function StudentSignup() {
 
                 if (data.error) {
 
+                    setLoading(false);
                     console.log('Error from server: ' + data.error);
-                    alert(data.error)
+                    setIsAlert({ show: true, close: close, message: data.error, type: "error" });
                     return;
 
                 }
@@ -233,9 +248,16 @@ export default function StudentSignup() {
             }
         } catch (err) {
             setLoading(false);
-            alert('Error Signing Up: ' + err);
+            setIsAlert({ show: true, close: close, message: "Sign Up Failed, Try again...", type: "error" });
+            console.log('Error Signing Up: ' + err);
 
         }
+
+    }
+
+    const close = async () => {
+
+        setIsAlert(null);
 
     }
 
@@ -404,6 +426,12 @@ export default function StudentSignup() {
                     </div>
 
                 </Modal>
+
+            }
+
+            {isAlert?.show &&
+
+                <Alert show={isAlert.show} close={close} type={isAlert.type} message={isAlert.message} />
 
             }
 

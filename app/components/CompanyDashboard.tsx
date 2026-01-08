@@ -8,6 +8,7 @@ import Post_Company from "./Post_Company";
 import Application_Company from "./Application_Company"
 import Shortlist_Card from "./Shortlist_Card"
 import Image from "next/image";
+import Alert from "./Alert";
 
 interface Token {
 
@@ -83,6 +84,15 @@ interface Form {
     companyName: string;
     period: string;
     type: string;
+
+}
+
+interface Alert {
+
+    show: boolean;
+    close: () => void;
+    message: string;
+    type: 'success' | 'error';
 
 }
 
@@ -252,6 +262,7 @@ The interview details, including the scheduled time and meeting link, are provid
     const [selectedDate, setSelectedDate] = useState(getMinDate)
     const [selectedTime, setSelectedTime] = useState(MinTime)
     const [letter, setLetter] = useState('')
+    const [isAlert, setIsAlert] = useState<Alert | null>(null);
 
     useEffect(() => {
 
@@ -263,7 +274,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 if (res.status != 200) {
 
-                    alert('No such registered company');
+                    setIsAlert({ show: true, close: close, message: "No such registered company", type: "error" });
+                    console.log('No such registered company');
                     return;
 
                 }
@@ -272,7 +284,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 if (!data) {
 
-                    alert('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                    console.log('Check connection issues');
                     return;
 
                 }
@@ -282,7 +295,9 @@ The interview details, including the scheduled time and meeting link, are provid
 
             } catch (err) {
 
-                alert("Error fetching company: " + err);
+
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                console.log("Error fetching company: " + err);
 
             }
         }
@@ -293,7 +308,7 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 const tokenString = localStorage.getItem("token");
 
-                if (!tokenString) { alert('Token not found. Try again..'); return; }
+                if (!tokenString) { console.log('Token not found. Try again..'); setIsAlert({ show: true, close: close, message: "Token not found", type: "error" }); return; }
 
                 const token: Token = jwtDecode(tokenString);
 
@@ -303,7 +318,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 if (res.status != 200) {
 
-                    alert('No such registered company');
+                    setIsAlert({ show: true, close: close, message: "No such registered company", type: "error" });
+                    console.log('No such registered company');
                     return;
 
                 }
@@ -312,7 +328,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 if (!data) {
 
-                    alert('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                    console.log('Check connection issues');
                     setMyPosts([]);
                     return;
 
@@ -322,7 +339,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
             } catch (err) {
 
-                alert("Error fetching company: " + err);
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                console.log("Error fetching company: " + err);
 
             }
         }
@@ -337,7 +355,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 if (res.status != 200) {
 
-                    alert('No applications sent');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                    console.log('No applications sent');
                     return;
 
                 }
@@ -345,7 +364,8 @@ The interview details, including the scheduled time and meeting link, are provid
                 const data = res.data;
                 if (!data) {
 
-                    alert('Check connection issues');
+                    console.log('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     setApplications([]);
                     return;
 
@@ -355,7 +375,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
             } catch (err) {
 
-                alert("Error fetching posts: " + err);
+                console.log("Error fetching posts: " + err);
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 setApplications([]);
 
             }
@@ -372,7 +393,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 if (res.status != 200) {
 
-                    alert('No applications selected');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                    console.log('No applications selected');
                     return;
 
                 }
@@ -380,7 +402,8 @@ The interview details, including the scheduled time and meeting link, are provid
                 const data = res.data;
                 if (!data) {
 
-                    alert('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                    console.log('Check connection issues');
                     setShortList([]);
                     return;
 
@@ -390,7 +413,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
             } catch (err) {
 
-                alert("Error fetching posts: " + err);
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                console.log("Error fetching posts: " + err);
                 setShortList([]);
 
             }
@@ -432,11 +456,13 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 const res = await axios.put('/api/posts', formData);
                 if (res.status !== 200) {
-                    alert('Check your internet connection');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                    console.log('Check your internet connection');
                     return;
                 }
                 if (res.data.message) {
-                    alert(res.data.message);
+                    setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
+                    console.log(res.data.message);
                 }
                 setModal(false);
                 setIsEditing(false);
@@ -447,11 +473,11 @@ The interview details, including the scheduled time and meeting link, are provid
             } else {
 
 
-                if (!jd) { alert('please upload your job description....'); return; }
+                if (!jd) { console.log('please upload your job description....'); setIsAlert({ show: true, close: close, message: "Please Upload Job Description", type: "error" }); return; }
 
                 const tokenString = localStorage.getItem("token");
 
-                if (!tokenString) { alert('Token not found. Try again..'); return; }
+                if (!tokenString) { console.log('Token not found. Try again..'); setIsAlert({ show: true, close: close, message: "Token not found. Try again...", type: "error" }); return; }
 
                 const token: Token = jwtDecode(tokenString);
 
@@ -469,19 +495,20 @@ The interview details, including the scheduled time and meeting link, are provid
                 formData.append("jd", jd);
                 formData.append("description", desc);
 
-                const res = await axios.post('/api/posts', formData)
-                console.log('hell1');
+                const res = await axios.post('/api/posts', formData);
 
                 if (res.status != 200) {
 
-                    alert('Check your internet connection');
+                    console.log('Check your internet connection');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     return;
 
                 }
 
                 if (res.data.message) {
 
-                    alert(res.data.message);
+                    console.log(res.data.message);
+                    setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
                 }
 
@@ -499,7 +526,8 @@ The interview details, including the scheduled time and meeting link, are provid
         } catch (err) {
 
             setLoading(false);
-            alert('Creating Job Post Failed.');
+            console.log('Creating Job Post Failed.');
+            setIsAlert({ show: true, close: close, message: "Creating Job Post Failed", type: "error" });
 
         } finally {
 
@@ -531,14 +559,16 @@ The interview details, including the scheduled time and meeting link, are provid
 
             if (res.status != 200) {
 
-                alert('Check your connection');
+                console.log('Check your connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
                 return;
 
             }
@@ -551,7 +581,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 }
 
-                alert('Application Reviewed sucessfully.');
+                setIsAlert({ show: true, close: close, message: "Application Reviewed Successfully", type: "success" });
+                console.log('Application Reviewed sucessfully.');
                 close();
                 setLoad(!load);
 
@@ -559,7 +590,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
         } catch (err) {
 
-            alert("Failed to cancel sent application...");
+            console.log("Failed to cancel sent application...");
+            setIsAlert({ show: true, close: close, message: "Failed to cancel application...", type: "error" });
             close();
             return;
 
@@ -580,27 +612,31 @@ The interview details, including the scheduled time and meeting link, are provid
 
             if (res.status != 200) {
 
-                alert('Check your connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
+                console.log('Check your connection');
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
+                console.log(res.data.message);
                 return;
 
             }
 
             if (res.data.done == 'true') {
 
-                alert('Application marked sucessfully.');
+                setIsAlert({ show: true, close: close, message: "Application marked sucessfully", type: "success" });
+                console.log('Application marked sucessfully.');
 
             }
 
         } catch (err) {
 
-            alert("Failed to mark application...");
+            console.log("Failed to mark application...");
+            setIsAlert({ show: true, close: close, message: "Failed to mark application...", type: "error" });
             close();
             return;
 
@@ -620,20 +656,23 @@ The interview details, including the scheduled time and meeting link, are provid
 
             if (res.status != 200) {
 
-                alert('Check your internet connection');
+                console.log('Check your internet connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
             }
 
             if (!res.data.jd) {
 
-                alert('No Job description added');
+                console.log('No Job description added');
+                setIsAlert({ show: true, close: close, message: "Job description is missing", type: "error" });
                 return;
 
             }
@@ -641,10 +680,12 @@ The interview details, including the scheduled time and meeting link, are provid
             setJdCompany(res.data.jd);
             setData({ ...res.data._doc, jd: res.data.jd })
             setShowJd(true);
-            setMarks(res.data._doc.marks)
+            setMarks(res.data._doc.marks);
+
         } catch (err) {
 
-            alert("Error showing job description: " + err);
+            console.log("Error showing job description: " + err);
+            setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
             return;
 
         }
@@ -661,14 +702,16 @@ The interview details, including the scheduled time and meeting link, are provid
 
             if (res.status != 200) {
 
-                alert('Check your internet connection');
+                console.log('Check your internet connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
             }
 
@@ -677,7 +720,8 @@ The interview details, including the scheduled time and meeting link, are provid
 
         } catch (err) {
 
-            alert("Error showing job description: " + err);
+            console.log("Error showing job description: " + err);
+            setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
             return;
 
         }
@@ -694,32 +738,35 @@ The interview details, including the scheduled time and meeting link, are provid
 
             if (res.status != 200) {
 
-                alert('Check your internet connection');
+                console.log('Check your internet connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
             }
 
             setData({ ...res.data._doc, jd: res.data.jd, address: res.data.address, role: res.data.role, type: res.data.type, period: res.data.period })
 
             setLetter(`
-We are pleased to inform you that you have been selected for the ${res.data.role} Internship at ${res.data.companyName}. After careful review of your application and interview, we were impressed 
-with your skills, enthusiasm, and potential, and we believe you will be a valuable addition to our team.
-    
-Your internship is scheduled to commence on ${selectedDate.split("-")[2] + " " + months[parseInt(selectedDate.split("-")[1]) - 1] + " " + selectedDate.split("-")[0]} and will continue until ${data.period == '6m' ? '6 Months' : '1 Year'}. The internship will be conducted ${res.data.type}.
-    
-Further details regarding onboarding, reporting structure, and required documentation will be shared with you shortly.
-    `)
+                We are pleased to inform you that you have been selected for the ${res.data.role} Internship at ${res.data.companyName}. After careful review of your application and interview, we were impressed 
+                with your skills, enthusiasm, and potential, and we believe you will be a valuable addition to our team.
+                
+                Your internship is scheduled to commence on ${selectedDate.split("-")[2] + " " + months[parseInt(selectedDate.split("-")[1]) - 1] + " " + selectedDate.split("-")[0]} and will continue until ${data.period == '6m' ? '6 Months' : '1 Year'}. The internship will be conducted ${res.data.type}.
+                
+                Further details regarding onboarding, reporting structure, and required documentation will be shared with you shortly.
+                `)
             setSendSelected(true);
 
         } catch (err) {
 
-            alert("Error showing job description: " + err);
+            console.log("Error showing job description: " + err);
+            setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
             return;
 
         }
@@ -751,32 +798,35 @@ Further details regarding onboarding, reporting structure, and required document
             if (res.status != 200) {
 
                 setMailLoading(false);
-                alert('Check your internet connection');
+                console.log('Check your internet connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
             }
 
             if (res.data.done == 'true') {
 
                 setLoad(!load)
-                alert('email sent');
+                console.log('email sent');
                 setShowInvite(false)
                 setInviteDate(getMinDate)
                 setInviteTime(getMinTimeForDate())
                 setMailLoading(false);
+                setIsAlert({ show: true, close: close, message: "Email sent", type: "success" });
             }
 
         } catch (err) {
 
             setMailLoading(false);
             console.log("Error sending email: " + err);
-            alert("Check your internet connection...")
+            setIsAlert({ show: true, close: close, message: "Email send failed. Try again...", type: "error" });
             return;
 
         }
@@ -808,32 +858,35 @@ Further details regarding onboarding, reporting structure, and required document
 
             if (res.status != 200) {
 
-                alert('Check your internet connection');
+                console.log('Check your internet connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
             }
 
             if (res.data.done == 'true') {
 
                 setSelectedMailLoading(false);
-                alert('email sent');
+                console.log('email sent');
                 setSendSelected(false)
                 setSelectedDate(getMinDate)
                 setSelectedTime(getMinTimeForDate())
                 setLoad(!load);
+                setIsAlert({ show: true, close: close, message: "Email sent", type: "success" });
             }
 
         } catch (err) {
 
             setSelectedMailLoading(false);
             console.log("Error sending email: " + err);
-            alert("Check your internet connection...")
+            setIsAlert({ show: true, close: close, message: "Send email failed...", type: "error" });
             return;
 
         }
@@ -902,15 +955,18 @@ Further details regarding onboarding, reporting structure, and required document
 
                 if (res.data.message) {
 
-                    alert(res.data.message);
+                    console.log(res.data.message);
+                    setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
                 }
                 setLoad(!load);
             } else {
-                alert('Error toggling status');
+                console.log('Error toggling status');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
             }
         } catch (err) {
-            alert('Error: ' + err);
+            console.log('Error: ' + err);
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
         }
 
     }
@@ -1354,6 +1410,12 @@ Further details regarding onboarding, reporting structure, and required document
                         </div>
                     </div>
                 </Modal>
+            }
+
+            {isAlert?.show &&
+
+                <Alert show={isAlert.show} close={close} type={isAlert.type} message={isAlert.message} />
+
             }
 
         </div>

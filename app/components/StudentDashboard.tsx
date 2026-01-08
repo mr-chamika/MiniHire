@@ -8,6 +8,7 @@ import Saved_Student from "./Saved_Student";
 import Modal from "./Modal";
 import Image from "next/image";
 import Application from "./Application";
+import Alert from "./Alert";
 interface Token {
 
     userId: string;
@@ -60,6 +61,14 @@ interface Application {
     status: string;
 
 }
+interface Alert {
+
+    show: boolean;
+    close: () => void;
+    message: string;
+    type: 'success' | 'error';
+
+}
 
 export default function StudentDashboard({ email }: { email: string }) {
 
@@ -75,6 +84,8 @@ export default function StudentDashboard({ email }: { email: string }) {
     const [hide, setHide] = useState(false);
     const [confirming, setConfirming] = useState(false);
     const [filter, setFilter] = useState("pending");
+    const [isAlert, setIsAlert] = useState<Alert | null>(null);
+
 
     //for application form
 
@@ -111,14 +122,16 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             if (res.status != 200) {
 
-                alert('Check your internet connection...');
+                console.log('Check your internet connection...');
+                setIsAlert({ show: true, close: close, message: "No such registered company", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
                 return;
 
             }
@@ -127,7 +140,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         } catch (err) {
 
-            alert('Error:' + err);
+            console.log('Error:' + err);
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
             return;
 
         }
@@ -146,7 +160,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         if (!data) {
 
-            alert('All fields required');
+            console.log('All fields required');
+            setIsAlert({ show: true, close: close, message: "All fields required...", type: "error" });
             return;
 
         }
@@ -169,27 +184,31 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         if (res.status != 200) {
 
-            alert('Check your internet connection...');
+            console.log('Check your internet connection...');
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
             return;
 
         }
 
         if (res.data.message) {
 
-            alert(res.data.message);
+            console.log(res.data.message);
+            setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
             return;
 
         }
 
         if (res.data.done != 'true') {
 
-            alert('Application sent Failed');
+            console.log('Application sent Failed');
+            setIsAlert({ show: true, close: close, message: "Failed to send application, Try again...", type: "error" });
             return;
 
         }
 
         await closeSubmission();
-        alert('Application sent Successfully');
+        console.log('Application sent Successfully');
+        setIsAlert({ show: true, close: close, message: "Application sent Successfully", type: "success" });
 
     }
 
@@ -203,20 +222,23 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             if (res.status != 200) {
 
-                alert('Check your internet connection');
+                console.log('Check your internet connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
 
             }
 
             if (!res.data.jd) {
 
-                alert('No Job description added');
+                console.log('No Job description added');
+                setIsAlert({ show: true, close: close, message: "No Job description added...", type: "error" });
                 return;
 
             }
@@ -232,7 +254,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         } catch (err) {
 
-            alert("Error showing job description: " + err);
+            console.log("Error showing job description: " + err);
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
             return;
 
         }
@@ -263,21 +286,24 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             if (res.status != 200) {
 
-                alert('Check your connection');
+                console.log('Check your connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
                 return;
 
             }
 
             if (res.data.done == 'true') {
 
-                alert('Application Reviewed sucessfully.');
+                console.log('Application Reviewed sucessfully.');
+                setIsAlert({ show: true, close: close, message: "Application Reviewed Successfully", type: "success" });
                 close();
                 setIsFav(!isFav);
 
@@ -285,14 +311,14 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         } catch (err) {
 
-            alert("Failed to cancel sent application...");
+            console.log("Failed to cancel sent application...");
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "success" });
             close();
             return;
 
         }
 
     }
-    console.log(data)
 
     const mark = async (id: string) => {//to mark a post as a favourite
 
@@ -307,21 +333,24 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             if (res.status != 200) {
 
-                alert('Check your connection');
+                console.log('Check your connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
                 return;
 
             }
 
             if (res.data.done != 'true') {
 
-                alert('Error saving post');
+                console.log('Error saving post');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 return;
 
             }
@@ -330,7 +359,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
         } catch (err) {
 
-            alert('Mark as favourite this post failed.')
+            console.log('Mark as favourite this post failed.');
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
 
         }
 
@@ -351,28 +381,32 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             if (res.status != 200) {
 
-                alert('Check your connection');
+                console.log('Check your connection');
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 return;
 
             }
 
             if (res.data.message) {
 
-                alert(res.data.message);
+                console.log(res.data.message);
+                setIsAlert({ show: true, close: close, message: res.data.message, type: "success" });
                 return;
 
             }
 
             if (res.data.done == 'true') {
 
-                alert('Application cancelled sucessfully.');
+                console.log('Application cancelled sucessfully.');
+                setIsAlert({ show: true, close: close, message: "Application cancelled sucessfully", type: "success" });
                 setIsFav(!isFav);
 
             }
 
         } catch (err) {
 
-            alert("Failed to cancel sent application...");
+            console.log("Failed to cancel sent application...");
+            setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
             return;
 
         }
@@ -392,7 +426,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 if (res.status != 200) {
 
-                    alert('No such registered company');
+                    console.log('No such registered company');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     return;
 
                 }
@@ -401,7 +436,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 if (!data.postSet) {
 
-                    alert('Check connection issues');
+                    console.log('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     setSaved([]);
                     return;
 
@@ -412,7 +448,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             } catch (err) {
 
-                alert("Error fetching saved posts: " + err);
+                console.log("Error fetching saved posts: " + err);
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 setSaved([]);
 
 
@@ -438,7 +475,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 if (res.status != 200) {
 
-                    alert('No recent posts');
+                    console.log('No recent posts');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     return;
 
                 }
@@ -447,7 +485,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 if (!data) {
 
-                    alert('Check connection issues');
+                    console.log('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     setPosts([]);
                     return;
 
@@ -457,7 +496,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             } catch (err) {
 
-                alert("Error fetching posts: " + err);
+                console.log("Error fetching posts: " + err);
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 setPosts([]);
 
             }
@@ -473,7 +513,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 if (res.status != 200) {
 
-                    alert('No applications sent');
+                    console.log('No applications sent');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     return;
 
                 }
@@ -482,7 +523,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 if (!data) {
 
-                    alert('Check connection issues');
+                    console.log('Check connection issues');
+                    setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                     setApplications([]);
                     return;
 
@@ -492,7 +534,8 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             } catch (err) {
 
-                alert("Error fetching posts: " + err);
+                console.log("Error fetching posts: " + err);
+                setIsAlert({ show: true, close: close, message: "Check your connection...", type: "error" });
                 setApplications([]);
 
             }
@@ -760,6 +803,12 @@ export default function StudentDashboard({ email }: { email: string }) {
                         }
                     </div>
                 </Modal>
+            }
+
+            {isAlert?.show &&
+
+                <Alert show={isAlert.show} close={close} type={isAlert.type} message={isAlert.message} />
+
             }
         </>
     );

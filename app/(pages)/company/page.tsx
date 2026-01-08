@@ -9,6 +9,16 @@ import Image from "next/image";
 import axios from "axios";
 import Modal from "@/app/components/Modal";
 import { useRouter } from "next/navigation";
+import Alert from "@/app/components/Alert";
+
+interface Alert {
+
+    show: boolean;
+    close: () => void;
+    message: string;
+    type: 'success' | 'error';
+
+}
 
 export default function CompanySignup() {
 
@@ -45,6 +55,7 @@ export default function CompanySignup() {
     const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const [verifying, setVerifying] = useState(false);
+    const [isAlert, setIsAlert] = useState<Alert | null>(null);
 
     const confirmPw = (e: any) => {
 
@@ -142,11 +153,11 @@ export default function CompanySignup() {
 
         e.preventDefault();
 
-        if (error || errorCP || errorE || errorF) {
+        // if (error || errorCP || errorE || errorF) {
 
-            return;
+        //     return;
 
-        }
+        // }
 
         setLoading(true);
 
@@ -163,12 +174,15 @@ export default function CompanySignup() {
 
                 if (password.trim().length < 8) {
 
+                    setLoading(false);
                     setError('Password must contains at least 8 characters');
                     setErrorCP('')
                     return;
 
                 }
                 if (password.trim() !== confirmPassword.trim()) {
+
+                    setLoading(false);
                     setError('')
                     setErrorCP('Password must matches with above entered');
                     return;
@@ -211,7 +225,7 @@ export default function CompanySignup() {
                 if (data.error) {
 
                     console.log('Error from server: ' + data.error);
-                    alert(data.error)
+                    setIsAlert({ show: true, close: close, message: data.error, type: "error" });
                     return;
 
                 }
@@ -237,7 +251,8 @@ export default function CompanySignup() {
         } catch (err) {
 
             setLoading(false);
-            alert('Error Signing Up: ' + err);
+            setIsAlert({ show: true, close: close, message: 'Sign Up failed. Try again...', type: "error" });
+            console.log('Error Signing Up: ' + err);
 
         }
 
@@ -395,6 +410,13 @@ export default function CompanySignup() {
                 </Modal>
 
             }
+
+            {isAlert?.show &&
+
+                <Alert show={isAlert.show} close={close} type={isAlert.type} message={isAlert.message} />
+
+            }
+
         </div>
 
     )

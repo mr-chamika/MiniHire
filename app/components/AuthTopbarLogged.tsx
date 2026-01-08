@@ -8,6 +8,7 @@ import Image from "next/image";
 
 import Profile from '../../public/assets/profile.png'
 import { jwtDecode } from "jwt-decode";
+import Alert from "./Alert";
 
 interface Token {
 
@@ -19,6 +20,15 @@ interface Token {
 
 }
 
+interface Alert {
+
+    show: boolean;
+    close: () => void;
+    message: string;
+    type: 'success' | 'error';
+
+}
+
 export default function AuthTopbarLogged() {
 
     const route = useRouter();
@@ -27,12 +37,13 @@ export default function AuthTopbarLogged() {
     const [toLanding, setToLanding] = useState(false);
     const [name, setName] = useState('');
     const [role, setRole] = useState('');
+    const [isAlert, setIsAlert] = useState<Alert | null>(null);
 
     useEffect(() => {
 
         const tokenString = localStorage.getItem("token");
 
-        if (!tokenString) { alert('token not found'); return; };
+        if (!tokenString) { console.log('token not found'); setIsAlert({ show: true, close: close, message: "Token not found", type: "error" }); return; };
 
         const token: Token = jwtDecode(tokenString);
 
@@ -54,7 +65,7 @@ export default function AuthTopbarLogged() {
 
         const tokenString = localStorage.getItem("token");
 
-        if (!tokenString) { alert('token not found'); return; };
+        if (!tokenString) { console.log('token not found'); setIsAlert({ show: true, close: close, message: "Token not found", type: "error" }); return; };
 
         const token: Token = jwtDecode(tokenString);
 
@@ -138,6 +149,12 @@ export default function AuthTopbarLogged() {
 
                 </Modal>
 
+
+            }
+
+            {isAlert?.show &&
+
+                <Alert show={isAlert.show} close={close} type={isAlert.type} message={isAlert.message} />
 
             }
 
