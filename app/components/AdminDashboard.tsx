@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Modal from "./Modal";
+import Image from "next/image";
 
 interface Company {
     _id: string;
@@ -55,7 +56,7 @@ export default function AdminDashboard({ email }: { email: string }) {
 
     const approveCompany = async (id: string) => {
         try {
-            await axios.post(`/api/users?approve=${id}`);
+            await axios.get(`/api/users?approve=${id}`);
             setCompanies(companies.map(c => c._id === id ? { ...c, verified: true } : c));
         } catch (err) {
             console.error('Error approving company:', err);
@@ -64,7 +65,7 @@ export default function AdminDashboard({ email }: { email: string }) {
 
     const unapproveCompany = async (id: string) => {
         try {
-            await axios.post(`/api/users?unapprove=${id}`);
+            await axios.get(`/api/users?unapprove=${id}`);
             setCompanies(companies.map(c => c._id === id ? { ...c, verified: false } : c));
         } catch (err) {
             console.error('Error unapproving company:', err);
@@ -116,7 +117,7 @@ export default function AdminDashboard({ email }: { email: string }) {
                         {filteredCompanies.map(company => (
                             <div key={company._id} className="bg-white shadow-lg rounded-xl p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
                                 <div className="flex items-center mb-4">
-                                    <img src={company.logo} alt={`${company.name} logo`} className="w-12 h-12 rounded-full mr-4 object-cover" />
+                                    <Image src={company.logo} alt={`${company.name} logo`} width={30} height={30} className="w-12 h-12 rounded-full mr-4 object-cover" />
                                     <div>
                                         <h2 className="text-xl font-semibold text-gray-800">{company.name}</h2>
                                         <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${company.verified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
