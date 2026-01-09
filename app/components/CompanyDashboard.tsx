@@ -536,11 +536,17 @@ The interview details, including the scheduled time and meeting link, are provid
         }
     }
 
-    const close = async () => {
+    const closed = async () => {
 
         setShowJd(false);
         setHide(false);
         setMarks(0)
+
+    }
+
+    const close = async () => {
+
+        setIsAlert(null);
 
     }
 
@@ -583,7 +589,7 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 setIsAlert({ show: true, close: close, message: "Application Reviewed Successfully", type: "success" });
                 console.log('Application Reviewed sucessfully.');
-                close();
+                closed();
                 setLoad(!load);
 
             }
@@ -592,7 +598,7 @@ The interview details, including the scheduled time and meeting link, are provid
 
             console.log("Failed to cancel sent application...");
             setIsAlert({ show: true, close: close, message: "Failed to cancel application...", type: "error" });
-            close();
+            closed();
             return;
 
         }
@@ -637,7 +643,7 @@ The interview details, including the scheduled time and meeting link, are provid
 
             console.log("Failed to mark application...");
             setIsAlert({ show: true, close: close, message: "Failed to mark application...", type: "error" });
-            close();
+            closed();
             return;
 
         }

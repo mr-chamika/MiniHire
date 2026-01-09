@@ -262,13 +262,19 @@ export default function StudentDashboard({ email }: { email: string }) {
 
     }
 
-    const close = async () => {
+    const closed = async () => {
 
         setShowJd(false);
         setHide(false);
         setConfirming(false);
         setData({ firstName: '', lastName: '', university: '', degree: '', portfolio: '', linkedin: '', resume: '', post_id: '', contactNumber: '', github: '', _idx: '' })
         setIsFav(!isFav)
+
+    }
+
+    const close = async () => {
+
+        setIsAlert(null);
 
     }
 
@@ -304,7 +310,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
                 console.log('Application Reviewed sucessfully.');
                 setIsAlert({ show: true, close: close, message: "Application Reviewed Successfully", type: "success" });
-                close();
+                closed();
                 setIsFav(!isFav);
 
             }
@@ -313,7 +319,7 @@ export default function StudentDashboard({ email }: { email: string }) {
 
             console.log("Failed to cancel sent application...");
             setIsAlert({ show: true, close: close, message: "Check your connection...", type: "success" });
-            close();
+            closed();
             return;
 
         }
