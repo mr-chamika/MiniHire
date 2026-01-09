@@ -976,7 +976,6 @@ The interview details, including the scheduled time and meeting link, are provid
         }
 
     }
-
     return (
 
         <div className="w-full flex flex-col min-w-[400px]">
@@ -992,20 +991,20 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 {/* shortlisted student list */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
-                    <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => ["selected", "interviewed", "recruited", "hired"].includes(app.status)).length + ')' : ''}</p>
-                        <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter2 == 'SE' ? 'border-yellow-400' : filter2 == 'QA' ? 'border-red-400' : 'border-black'}`}>
+                    <div className="flex flex-row gap-6 justify-center border-b-2 border-slate-100">
+                        <p className="pt-2 text-center text-xl font-mono">Shortlist {shortlist && shortlist.filter(app => ["selected", "interviewed", "recruited", "hired"].includes(app.status)).length > 0 && (shortlist && shortlist.length > 0 ? '(' + shortlist.filter(app => ["selected", "interviewed", "recruited", "hired"].includes(app.status)).length + ')' : '')}</p>
+                        {shortlist && shortlist.filter(app => ["selected", "interviewed", "recruited", "hired"].includes(app.status)).length > 0 && <select value={filter2} onChange={(e) => setFilter2(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter2 == 'SE' ? 'border-yellow-400' : filter2 == 'QA' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
                             <option value="SE">SE {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['SE'].includes(app.role)).length + ')' : ''}</option>
                             <option value="QA">QA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['QA'].includes(app.role)).length + ')' : ''}</option>
                             <option value="BA">BA {shortlist && shortlist.length > 0 ? '(' + shortlist?.filter((app) => ['BA'].includes(app.role)).length + ')' : ''}</option>
 
-                        </select>
+                        </select>}
                     </div>
 
                     <div className="w-full h-[73vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">
-                        {shortlist?.filter((app) => [filter2, "CS"].includes(app.role)).length == 0 ?
+                        {shortlist?.filter((app) => [filter2].includes(app.role)).length == 0 ?
 
                             <div className="h-full w-full flex justify-center items-center">
 
@@ -1015,7 +1014,7 @@ The interview details, including the scheduled time and meeting link, are provid
                             :
                             <div>
 
-                                {shortlist?.filter((app) => [filter2, "CS"].includes(app.degree.split(" ")[0])).map((application) => {
+                                {shortlist?.filter((app) => [filter2].includes(app.role)).map((application) => {
 
                                     return (
 
@@ -1099,16 +1098,16 @@ The interview details, including the scheduled time and meeting link, are provid
 
                 {/* applications list received by students */}
                 <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
-                    <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.length > 0 ? '(' + applications.filter(app => !["selected", "interviewed", "recruited", "hired"].includes(app.status)).length + ')' : ''}</p>
-                        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+                    <div className="flex flex-row gap-6 justify-center border-b-2 border-slate-100">
+                        <p className="pt-2 text-center text-xl font-mono">Received {applications && applications.filter(app => !["selected", "interviewed", "recruited", "hired"].includes(app.status)).length > 0 ? '(' + applications.filter(app => !["selected", "interviewed", "recruited", "hired"].includes(app.status)).length + ')' : ''}</p>
+                        {applications && applications.filter(app => !["selected", "interviewed", "recruited", "hired"].includes(app.status)).length > 0 && <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${/*filter == 'selected' ? 'border-green-400' :*/ filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
                             {/* <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option> */}
                             <option value="pending">Pending {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'pending').length + ')' : ''}</option>
                             <option value="rejected">Rejected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'rejected').length + ')' : ''}</option>
                             <option value="cancelled">Cancelled {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'cancelled').length + ')' : ''}</option>
 
-                        </select>
+                        </select>}
                     </div>
 
                     <div className="w-full h-[73vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">

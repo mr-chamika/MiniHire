@@ -665,8 +665,8 @@ export default function StudentDashboard({ email }: { email: string }) {
                     {/* applications list received by students */}
                     <section className="sm:w-[25%] sm:min-w-[320px] w-full bg-yellow-50">
                         <div className="flex flex-row gap-6 justify-end border-b-2 border-slate-100">
-                            <p className="pt-2 text-center text-xl font-mono">Sent {applications && applications.length > 0 ? '(' + applications?.length + ')' : ''}</p>
-                            <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
+                            <p className="pt-2 text-center text-xl font-mono">Sent {(applications && applications.length > 0) && (applications && applications.length > 0 ? '(' + applications?.length + ')' : '')}</p>
+                            {(applications && applications.length > 0) && <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`appearance-none bg-inherit bg-slate-100 h-7 hover:cursor-pointer pr-2 pb-[2px] outline-none self-center rounded-lg pl-3 border-2 ${filter == 'selected' ? 'border-green-400' : filter == 'pending' ? 'border-yellow-400' : filter == 'cancelled' ? 'border-red-400' : 'border-black'}`}>
 
                                 <option value="selected">Selected {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'selected').length + ')' : ''}</option>
                                 <option value="pending">Pending {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'pending').length + ')' : ''}</option>
@@ -676,7 +676,7 @@ export default function StudentDashboard({ email }: { email: string }) {
                                 <option value="interviewed">Interviewed {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'interviewed').length + ')' : ''}</option>
                                 <option value="hired">Hired {applications && applications.length > 0 ? '(' + applications?.filter((app) => app.status == 'hired').length + ')' : ''}</option>
 
-                            </select>
+                            </select>}
                         </div>
 
                         <div className="w-full h-[79vh] overflow-y-auto scroll-smooth overflow-x-hidden scrollbar-hide">

@@ -27,7 +27,7 @@ export default function Saved_Student({ _id, role, type, description, createdAt,
 
             </div>
 
-            <p className="italic text-sm px-5 min-w-[50%] text-justify py-2">{description.slice(0, 70)}...</p>
+            <p className="italic text-sm px-5 min-w-[50%] text-justify py-2 break-words">{description.slice(0, 70)}...</p>
 
             <div className="px-4 w-full flex flex-row justify-between items-center">
                 <div className='flex flex-row sm:gap-2 gap-0 justify-between sm:justify-normal w-[83%] text-sm sm:text-lg'>
