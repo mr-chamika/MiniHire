@@ -45,7 +45,6 @@ export default function LoginPage() {
                 setMessage('')
                 setError('')
                 const formData = new FormData();
-
                 formData.append("email", email.toLowerCase());
                 formData.append("password", password);
 

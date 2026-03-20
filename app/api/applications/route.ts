@@ -5,6 +5,7 @@ import { Post } from "@/models/Post";
 import { Student } from "@/models/Student";
 import { URL } from "url";
 import emaijs from '@emailjs/nodejs'
+import { getProducer } from "@/services/producer";
 
 export async function POST(req: Request) {
 
@@ -447,8 +448,27 @@ export async function PUT(req: Request) {
         } else if (review == "hired" && application.status == 'recruited') {
 
             const post = await Post.findOne({ _id: application.post_id });
+            const student = await Student.findOne({ email: application.email });
 
-            if (post.vacancies > post.recruited) {
+            if ((post.vacancies > post.recruited) && (post && student)) {
+
+                try {
+                    const producer = await getProducer();
+                    await producer.send({
+                        topic: 'hire-fromCompany',
+                        messages: [{
+                            value: JSON.stringify({
+                                studentId: student._id.toString(),
+                                companyName: post.companyName,
+                                companyId: post.createdBy,
+                                role: post.role,
+                                email: application.email
+                            })
+                        }]
+                    })
+                } catch (err) {
+                    console.warn('Kafka unavailable, notification skipped:', err);
+                }
 
                 post.recruited = post.recruited + 1;
 

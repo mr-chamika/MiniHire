@@ -6,6 +6,7 @@ import emailjs from "@emailjs/nodejs";
 import jwt from "jsonwebtoken";
 import { Company } from "@/models/Company";
 import { Admin } from "@/models/Admin";
+import { Post } from "@/models/Post";
 
 export async function POST(req: Request) {
 
@@ -229,11 +230,9 @@ This code will expire in 5 minutes.`;
             let user = null;
 
             user = await Student.findOne({ email: email.toLowerCase() })
-
             if (!user) {
 
                 user = await Company.findOne({ email: email.toLowerCase() })
-
 
             }
 

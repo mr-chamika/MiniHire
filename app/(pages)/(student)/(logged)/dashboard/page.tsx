@@ -29,14 +29,19 @@ export default function Dashboard() {
 
             const tokenString = localStorage.getItem("token");
 
-            if (!tokenString) {
-
-                router.replace(`/login?message=${encodeURIComponent("Token Expired")}`)
+            if (!tokenString || tokenString.split('.').length !== 3) {
+                router.replace(`/login?message=${encodeURIComponent("Token Expired or Invalid")}`)
                 return;
             }
 
-            const token: Token = jwtDecode(tokenString);
-
+            let token: Token;
+            try {
+                token = jwtDecode(tokenString);
+            } catch (err) {
+                localStorage.removeItem("token");
+                router.replace(`/login?message=${encodeURIComponent("Token Expired or Invalid")}`)
+                return;
+            }
             setEmail(token.email);
             setRole(token.role);
 

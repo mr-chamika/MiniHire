@@ -2,7 +2,7 @@ import { Kafka, Producer } from "kafkajs";
 
 const kafka = new Kafka({
     clientId: "minihire",
-    brokers: ["localhost:9092"],
+    brokers: ["127.0.0.1:9092"],
 });
 
 let producer: Producer | undefined;
@@ -15,33 +15,33 @@ export async function getProducer() {
     return producer;
 }
 
-const run = async () => {
+// const run = async () => {
 
-    try {
+//     try {
 
-        const producer = await getProducer();
+//         const producer = await getProducer();
 
-        await producer.send({
+//         await producer.send({
 
-            topic: 'first-topic',
-            messages: [
+//             topic: 'hello',
+//             messages: [
 
-                { value: 'hello i am minihire' },
-                //{ value: JSON.stringify({ message: 'hello i am minihire' }) }
+//                 { value: 'hello i am minihire' },
+//                 //{ value: JSON.stringify({ message: 'hello i am minihire' }) }
 
-            ]
+//             ]
 
-        })
+//         })
 
-    } catch (err) {
+//     } catch (err) {
 
-        console.log(err);
+//         console.log(err);
 
-    }
-
-
+//     }
 
 
-}
 
-run();
+
+// }
+
+// run();
